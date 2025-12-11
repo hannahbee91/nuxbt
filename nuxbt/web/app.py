@@ -4,11 +4,12 @@ from threading import RLock
 import time
 from socket import gethostname
 
-from .cert import generate_cert
+
 from ..nuxbt import Nxbt, PRO_CONTROLLER
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
-import eventlet
+import uvicorn
+import socketio
 
 
 app = Flask(__name__,
@@ -30,8 +31,30 @@ else:
         secret_key = f.read()
 app.config['SECRET_KEY'] = secret_key
 
-# Starting socket server with Flask app
-sio = SocketIO(app, cookie=False)
+from a2wsgi import WSGIMiddleware
+from socketio import WSGIApp
+
+# async_mode='threading' to avoid eventlet auto-detection if installed
+sio = SocketIO(app, async_mode='threading', cookie=False)
+
+# Helper middleware to inject flask.app into environ for Flask-SocketIO
+class FlaskAppInjector:
+    def __init__(self, app, wsgi_app):
+        self.app = app
+        self.wsgi_app = wsgi_app
+    def __call__(self, environ, start_response):
+        environ['flask.app'] = self.app
+        return self.wsgi_app(environ, start_response)
+
+# Create a combined WSGI app (Socket.IO + Flask)
+# This uses the synchronous Socket.IO server (threading mode) compatible with WSGI
+combined_wsgi_app = WSGIApp(sio.server, app)
+
+# Inject flask.app
+injected_wsgi_app = FlaskAppInjector(app, combined_wsgi_app)
+
+# Wrap the combined WSGI app with a2wsgi to run on uvicorn (ASGI)
+app_asgi = WSGIMiddleware(injected_wsgi_app)
 
 user_info_lock = RLock()
 USER_INFO = {}
@@ -114,55 +137,20 @@ def handle_stop_all_macros():
 
 
 
-def start_web_app(ip='0.0.0.0', port=8000, usessl=False, cert_path=None):
-    if usessl:
-        if cert_path is None:
-            # Store certs in the package directory
-            cert_path = os.path.join(
-                os.path.dirname(__file__), "cert.pem"
-            )
-            key_path = os.path.join(
-                os.path.dirname(__file__), "key.pem"
-            )
-        else:
-            # If specified, store certs at the user's preferred location
-            cert_path = os.path.join(
-                cert_path, "cert.pem"
-            )
-            key_path = os.path.join(
-                cert_path, "key.pem"
-            )
-        if not os.path.isfile(cert_path) or not os.path.isfile(key_path):
-            print(
-                "\n"
-                "-----------------------------------------\n"
-                "---------------->WARNING<----------------\n"
-                "The NUXBT webapp is being run with self-\n"
-                "signed SSL certificates for use on your\n"
-                "local network.\n"
-                "\n"
-                "These certificates ARE NOT safe for\n"
-                "production use. Please generate valid\n"
-                "SSL certificates if you plan on using the\n"
-                "NUXBT webapp anywhere other than your own\n"
-                "network.\n"
-                "-----------------------------------------\n"
-                "\n"
-                "The above warning will only be shown once\n"
-                "on certificate generation."
-                "\n"
-            )
-            print("Generating certificates...")
-            cert, key = generate_cert(gethostname())
-            with open(cert_path, "wb") as f:
-                f.write(cert)
-            with open(key_path, "wb") as f:
-                f.write(key)
-
-        eventlet.wsgi.server(eventlet.wrap_ssl(eventlet.listen((ip, port)),
-            certfile=cert_path, keyfile=key_path), app)
-    else:
-        eventlet.wsgi.server(eventlet.listen((ip, port)), app)
+def start_web_app(ip='0.0.0.0', port=8000):
+    # Run uvicorn server
+    # note: app_asgi is not available in this scope easily if it's top level, 
+    # but 'app.py' is the module. 
+    # I should actually fix the variable access or just wrap it here?
+    # The variable `app` in this file is the Flask app. 
+    # I replaced the socketio init above to create `app_asgi`.
+    # I need to make sure `app_asgi` is accessible or defined.
+    
+    # Actually, uvicorn.run expects an import string or an app instance.
+    # Since I'm creating app_asgi at module level (in the previous chunk), I can use it.
+    # But wait, the previous chunk target line 34.
+    
+    uvicorn.run(app_asgi, host=ip, port=port, ws='wsproto')
 
 
 if __name__ == "__main__":

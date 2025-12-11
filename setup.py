@@ -10,7 +10,9 @@ setup(
         "dbus-python>=1.2.16",
         "Flask>=2.1.3",
         "Flask-SocketIO>=5.3.4",
-        "eventlet>=0.33.3",
+        "uvicorn>=0.30.0",
+        "a2wsgi>=1.10.0",
+        "click>=8.3.1",
         "blessed>=1.17.10",
         "pynput>=1.7.1",
         "psutil>=5.6.6",
@@ -21,7 +23,8 @@ setup(
     ],
     extra_require={
         "dev": [
-            "pytest"
+            "pytest",
+            "pytest-playwright",
         ]
     }
 )
