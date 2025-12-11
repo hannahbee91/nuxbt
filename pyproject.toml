@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "nuxbt"
+version = "1.0.1"
+description = "Control your Nintendo Switch through a website, terminal, or macro."
+authors = ["Hannah Brown <hannah@hannahis.gay>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "nuxbt"}]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.urls]
+"Code" = "https://github.com/hannahbee91/nuxbt"
+"Issue tracker" = "https://github.com/hannahbee91/nuxbt/issues"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+dbus-python = ">=1.2.16"
+Flask = ">=2.1.3"
+Flask-SocketIO = ">=5.3.4"
+eventlet = ">=0.33.3"
+blessed = ">=1.17.10"
+pynput = ">=1.7.1"
+psutil = ">=5.6.6"
+cryptography = ">=3.3.2"
+jinja2 = ">=3.0.3"
+itsdangerous = ">=2.0.1"
+Werkzeug = ">=2.0.3"
+uvicorn = "^0.38.0"
+a2wsgi = "^1.10.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-playwright = "^0.4.0"
+playwright = "^1.40.0"
+python-semantic-release = "^9.0.0"
+
+[tool.poetry.scripts]
+nuxbt = "nuxbt.cli:main"
+
+[tool.semantic_release]
+version_variable = [
+    "nuxbt/__init__.py:__version__",
+    "pyproject.toml:version"
+]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

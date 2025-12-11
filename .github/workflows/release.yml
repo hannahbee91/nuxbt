@@ -1,0 +1,36 @@
+name: Publish Python Package
+
+on:
+  release:
+    types: [published] # This triggers the workflow when a release is published
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for PyPI trusted publishing
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install project dependencies
+        run: poetry install --sync --no-interaction
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # The action automatically uses the OIDC token for authentication
+          # and finds the built distribution files in the 'dist' directory
+          repository-url: https://upload.pypi.org/legacy/ # Optional, defaults to PyPI
