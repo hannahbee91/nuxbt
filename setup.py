@@ -11,6 +11,7 @@ setup(
         "Flask>=2.1.3",
         "Flask-SocketIO>=5.3.4",
         "eventlet>=0.33.3",
+        "click",
         "blessed>=1.17.10",
         "pynput>=1.7.1",
         "psutil>=5.6.6",
@@ -21,7 +22,8 @@ setup(
     ],
     extra_require={
         "dev": [
-            "pytest"
+            "pytest",
+            "pytest-playwright",
         ]
     }
 )
