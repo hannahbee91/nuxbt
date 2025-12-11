@@ -48,7 +48,12 @@ def web_server(mock_backend):
     # Actually app.py has start_web_app function.
     # We can patch eventlet.listen to bind to 5001
     
-    server_thread = threading.Thread(target=lambda: app.sio.run(app.app, port=port, allow_unsafe_werkzeug=True))
+    # Run uvicorn in a separated thread
+    import uvicorn
+    # Redirect stderr/stdout to avoid cluttering test output if desired, or keep it.
+    # uvicorn.run blocks, so we run it in a thread.
+    
+    server_thread = threading.Thread(target=lambda: uvicorn.run(app.app_asgi, host="127.0.0.1", port=port, log_level="critical", ws='wsproto'))
     server_thread.daemon = True
     server_thread.start()
     

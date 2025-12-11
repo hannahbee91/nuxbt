@@ -96,12 +96,10 @@ def cli(ctx, debug, logfile):
 @cli.command()
 @click.option('--ip', default="0.0.0.0", help="Specifies the IP to run the webapp at. Defaults to 0.0.0.0")
 @click.option('--port', default=8000, help="Specifies the port to run the webapp at. Defaults to 8000")
-@click.option('--usessl/--no-usessl', default=False, help="Enables or disables SSL use in the webapp")
-@click.option('--certpath', default=None, help="Specifies the folder location for SSL certificates.")
-def webapp(ip, port, usessl, certpath):
+def webapp(ip, port):
     """Runs web server and allows for controller/macro input from a web browser."""
     from .web import start_web_app
-    start_web_app(ip=ip, port=port, usessl=usessl, cert_path=certpath)
+    start_web_app(ip=ip, port=port)
 
 @cli.command()
 @click.pass_context
