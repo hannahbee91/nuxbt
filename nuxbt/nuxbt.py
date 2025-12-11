@@ -178,7 +178,12 @@ class Nxbt():
 
         # Disable the BlueZ input plugin so we can use the
         # HID control/interrupt Bluetooth ports
-        toggle_clean_bluez(True)
+        try:
+            toggle_clean_bluez(True)
+        except PermissionError:
+            self.logger.warning("Unable to toggle BlueZ plugins. Please ensure the Input plugin is disabled manually.")
+        except Exception as e:
+            self.logger.warning(f"Failed to toggle BlueZ plugins: {e}")
 
         # Exit handler
         atexit.register(self._on_exit)
@@ -208,7 +213,12 @@ class Nxbt():
         self.resource_manager.shutdown()
 
         # Re-enable the BlueZ plugins, if we have permission
-        toggle_clean_bluez(False)
+        try:
+            toggle_clean_bluez(False)
+        except PermissionError:
+            pass
+        except Exception:
+            pass
 
     def _command_manager(self, task_queue, state):
         """Used as the main multiprocessing Process that is launched

@@ -374,7 +374,11 @@ class ControllerServer():
                 # A device's class must be set **AFTER** discoverability
                 # is set. If it is set before or in a similar timeframe,
                 # the class will be reset to the default value.
-                self.bt.set_class("0x02508")
+                try:
+                    self.bt.set_class("0x02508")
+                except Exception as e:
+                    self.logger.warning(f"Unable to set device class: {e}")
+                    self.logger.warning("If connection fails, please manually set device class to 0x02508 (Gamepad) using hciconfig.")
 
                 self._crw_running = True
                 crw = Thread(target = self.connection_reset_watchdog)
@@ -508,4 +512,7 @@ class ControllerServer():
         return itr, ctrl
 
     def _on_exit(self):
-        self.bt.reset_address()
+        try:
+            self.bt.reset_address()
+        except:
+            pass

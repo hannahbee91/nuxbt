@@ -27,12 +27,12 @@ locations (user calibration excluded):
 
 ## Decoding a Stick's Position
 
-**Note:** The following configuration values are used within Nxbt.
+**Note:** The following configuration values are used within Nuxbt.
 
 First, we use the data obtained from the 0x603D SPI flash read to
 derive the right/left stick calibration parameters.
 
-Sample data output by Nxbt:
+Sample data output by Nuxbt:
 ```
 Payload:    0xA1 0x21 0x2B 0x90 0x00 0x00 0x00 0x74 0x58 0x75 0x4B 0x68 0x7C 0x90 
                0    1    2    3    4    5    6    7    8    9   10   11   12   13
