@@ -43,10 +43,13 @@ python-semantic-release = "^9.0.0"
 nuxbt = "nuxbt.cli:main"
 
 [tool.semantic_release]
-version_variable = [
+version_variables = [
     "nuxbt/__init__.py:__version__",
-    "pyproject.toml:version"
 ]
+version_toml = [
+    "pyproject.toml:tool.poetry.version"
+]
+tag_format = "v{version}"
 branch = "main"
 commit_message = "{version} [skip ci]"
 upload_to_pypi = false
