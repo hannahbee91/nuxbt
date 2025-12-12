@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.2.0 (2025-12-12)
+
+### Features
+
+- **releases**: Releases now build DEB and RPM files
+  ([#8](https://github.com/hannahbee91/nuxbt/pull/8),
+  [`06f5c5a`](https://github.com/hannahbee91/nuxbt/commit/06f5c5a7edc1767b7be2388e5a47a8021e410316))
+
+
 ## v1.1.2 (2025-12-12)
 
 ### Bug Fixes
