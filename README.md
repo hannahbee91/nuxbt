@@ -55,10 +55,10 @@ pip --user install nuxbt
 This will install NUXBT into your current Python environment, for your user only. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
 
 ```bash
-alias nuxbt="sudo $(which nuxbt)"
+alias nuxbt="sudo -E $(which nuxbt)"
 ```
 
-**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`. By using `which nuxbt`, we ensure that the alias points to the correct nuxbt executable, even if it's in a virtual environment.
+**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`. By using `which nuxbt`, we ensure that the alias points to the correct nuxbt executable, even if it's in a virtual environment. If you're using pyenv, you can use `$(pyenv which nuxbt)` instead of `$(which nuxbt)`.
 
 ### Windows and macOS
 
