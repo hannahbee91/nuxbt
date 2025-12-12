@@ -8,6 +8,7 @@ on:
       - 'nuxbt/**'
       - 'pyproject.toml'
       - 'poetry.lock'
+      - 'MANIFEST.in'
 
 jobs:
   bump-version:
