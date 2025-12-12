@@ -45,16 +45,13 @@
 ### Linux
 
 ```bash
-pyenv install 3.11
-pyenv virtualenv 3.11 nuxbt
-pyenv activate nuxbt
-pip install git+https://github.com/hannahbee91/nuxbt.git
+pip --user install nuxbt
 ```
 
-This will create a virtual environment and install NUXBT into it. If you do not have pyenv installed, you can follow the instructions [here](https://github.com/pyenv/pyenv#installation), or use any other virtual environment manager. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
+This will install NUXBT into your current Python environment. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
 
 ```bash
-alias nuxbt="sudo $HOME/.pyenv/versions/nuxbt/bin/nuxbt"
+alias nuxbt="sudo $(which nuxbt)"
 ```
 
 **Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`.
