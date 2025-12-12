@@ -1,0 +1,41 @@
+name: "nuxbt"
+arch: "amd64"
+platform: "linux"
+version: "${VERSION}"
+section: "utils"
+priority: "optional"
+maintainer: "Hannah Brown <hannah@hannahis.gay>"
+description: "Control your Nintendo Switch through a website, terminal, or macro."
+vendor: "Hannah Brown"
+homepage: "https://github.com/hannahbee91/nuxbt"
+license: "MIT"
+contents:
+  - src: ./dist/usr/lib/nuxbt
+    dst: /usr/lib/nuxbt
+    type: tree
+    file_info:
+      mode: 0755
+  - src: /usr/lib/nuxbt/bin/nuxbt
+    dst: /usr/bin/nuxbt
+    type: symlink
+overrides:
+  deb:
+    depends:
+    - libdbus-1-3
+    - libcairo2
+    - libgirepository-1.0-1
+  rpm:
+    depends:
+    - dbus-libs
+    - cairo
+    - gobject-introspection
+deb:
+  scripts:
+  triggers:
+  signature:
+    method: debsign
+    key_id: "${GPG_KEY_ID}"
+rpm:
+  signature:
+    key_id: "${GPG_KEY_ID}"
+

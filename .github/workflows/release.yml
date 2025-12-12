@@ -39,3 +39,48 @@ jobs:
           # The action automatically uses the OIDC token for authentication
           # and finds the built distribution files in the 'dist' directory
           repository-url: https://upload.pypi.org/legacy/ # Optional, defaults to PyPI
+
+      - name: Build Virtual Environment
+        run: |
+          # Create the directory structure mimicking the target
+          mkdir -p dist/usr/lib/nuxbt
+          
+          # Create venv in the temporary location
+          python3 -m venv dist/usr/lib/nuxbt
+          
+          # Install the package and dependencies into the venv
+          source dist/usr/lib/nuxbt/bin/activate
+          poetry build
+          pip install dist/*.whl
+          
+          # Fix shebangs to point to the target location /usr/lib/nuxbt
+          # This ensures that when installed, they look for python in the right place
+          sed -i 's|#!'"$PWD"'/dist/usr/lib/nuxbt|#!/usr/lib/nuxbt|g' dist/usr/lib/nuxbt/bin/*
+
+      - name: Install NFPM
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update
+          sudo apt-get install -y nfpm
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Build DEB and RPM packages
+        env:
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: |
+          export VERSION=${{ github.event.release.tag_name }}
+          export VERSION=${VERSION#v}
+          nfpm pkg --packager deb --target dist/nuxbt_${VERSION}_amd64.deb
+          nfpm pkg --packager rpm --target dist/nuxbt-${VERSION}.x86_64.rpm
+
+      - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} dist/nuxbt_*.deb dist/nuxbt-*.rpm

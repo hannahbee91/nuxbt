@@ -46,7 +46,30 @@
 
 ## Installation
 
-### Linux
+### Linux (DEB/RPM - Recommended)
+
+1. Go to the [Releases page](https://github.com/hannahbee91/nuxbt/releases/latest).
+2. Download the appropriate package for your system (`.deb` for Debian/Ubuntu, `.rpm` for Fedora/CentOS/openSUSE).
+3. Install the package:
+
+   **Debian/Ubuntu:**
+   ```bash
+   sudo apt install ./nuxbt_*.deb
+   ```
+
+   **Fedora/RedHat:**
+   ```bash
+   sudo dnf install ./nuxbt-*.rpm
+   ```
+
+This will properly install dependencies and available update the `nuxbt` command on your system.
+
+  **Running NUXBT:**
+  ```bash
+  sudo nuxbt
+  ```
+
+### Linux (Manual / Pip)
 
 ```bash
 pip --user install nuxbt
@@ -348,10 +371,9 @@ This means that another service has already bound itself to the Control and Inte
 3. Transition the webapp to a more maintainable React build
 4. Allow for recording macros from direct input over the TUI
 5. Locally store created macros, allowing for naming and reusing across sessions
-6. Package NUXBT as deb and rpm packages
-7. Create PPA for Ubuntu
-8. Create Flatpak
-9. Add support for Switch 2 controller emulation
+6. Create PPA for Ubuntu
+7. ~~Create Flatpak~~ - Not possible due to needing root access to bluetooth modules
+8. Add support for Switch 2 controller emulation
 
 ### Plans that Need More Testing
 
