@@ -1,3 +1,4 @@
+include nuxbt/*.py
 include nuxbt/controller/*.py
 include nuxbt/controller/sdp/*.xml
 include nuxbt/web/*.py
