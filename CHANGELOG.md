@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.2.2 (2025-12-12)
+
+### Bug Fixes
+
+- **releases**: Fixed the release and deb package dependencies to target 3.12
+  ([#10](https://github.com/hannahbee91/nuxbt/pull/10),
+  [`bc95561`](https://github.com/hannahbee91/nuxbt/commit/bc95561ffe67475f2a3e1781b39540abf31d4059))
+
+
 ## v1.2.1 (2025-12-12)
 
 ### Bug Fixes
