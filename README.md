@@ -6,24 +6,22 @@
   <br>
 </h1>
 
-<h4 align="center">Fork and update of the original [NXBT](https://github.com/Brikwerk/nxbt) - maintaining this fork as the original author has not been active for over 2 years.
+<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nxbt">NXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
 
 <h4 align="center">Control your Nintendo Switch through a website, terminal, or macro.</h4>
 
 <div align="center">
 
-  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
 
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#troubleshooting">Troubleshooting</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Troubleshooting](#troubleshooting)
+- [Credits](#credits)
+- [License](#license)
 
 ![screenshot](https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-example.png)
 
