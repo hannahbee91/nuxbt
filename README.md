@@ -6,26 +6,30 @@
   <br>
 </h1>
 
-<h4 align="center">Fork and update of the original [NXBT](https://github.com/Brikwerk/nxbt) - maintaining this fork as the original author has not been active for over 2 years.
+<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nxbt">NXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
 
 <h4 align="center">Control your Nintendo Switch through a website, terminal, or macro.</h4>
 
 <div align="center">
 
-  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
 
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#troubleshooting">Troubleshooting</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
+## Table of Contents
 
-![screenshot](https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-example.png)
+- [✨ Key Features](#key-features)
+- [📦 Installation](#installation)
+- [🚀 Getting Started](#getting-started)
+- [🌐 Using the Webapp](#using-the-webapp)
+- [💻 Using the TUI](#using-the-tui)
+- [🤖 Running Macros](#running-macros)
+- [🐍 Using the API](#using-the-api)
+- [🔧 Troubleshooting](#troubleshooting)
+- [🔮 Future Plans](#future-plans)
+- [🐛 Issues](#issues)
+- [👥 Credits](#credits)
+- [📄 License](#license)
 
 ## Key Features
 
@@ -45,16 +49,13 @@
 ### Linux
 
 ```bash
-pyenv install 3.11
-pyenv virtualenv 3.11 nuxbt
-pyenv activate nuxbt
-pip install git+https://github.com/hannahbee91/nuxbt.git
+pip --user install nuxbt
 ```
 
-This will create a virtual environment and install NUXBT into it. If you do not have pyenv installed, you can follow the instructions [here](https://github.com/pyenv/pyenv#installation), or use any other virtual environment manager. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
+This will install NUXBT into your current Python environment, for your user only. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
 
 ```bash
-alias nuxbt="sudo $HOME/.pyenv/versions/nuxbt/bin/nuxbt"
+alias nuxbt="sudo $(which nuxbt)"
 ```
 
 **Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`.
@@ -129,7 +130,7 @@ The webapp itself will be locally accessible at `http://127.0.0.1:8000` or, if y
 You should see a webpage similar to the following image:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-webapp-start.png" alt="NUXBT Webapp Start Screen" width="600">
+  <img src="/docs/img/nuxbt-webapp-start.png" alt="NUXBT Webapp Start Screen" width="600">
 </div>
 
 To create and start a Pro Controller, click the Pro controller graphic. If creation/boot is successful, the website will switch to a loading screen. During this time, you should have the Nintendo Switch you wish to connect to powered on and within range of the host computer.
@@ -139,7 +140,7 @@ To create and start a Pro Controller, click the Pro controller graphic. If creat
 Once you've successfully connected to the Nintendo Switch, you should see a webpage similar to below:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-webapp-connected.png" alt="NUXBT Webapp Connected Screen" width="600">
+  <img src="/docs/img/nuxbt-webapp-connected.png" alt="NUXBT Webapp Connected Screen" width="600">
 </div>
 
 Here, you can change your input method, shutdown or restart the controller, and run an NUXBT macro.
@@ -164,7 +165,7 @@ nuxbt tui
 A loading screen should open and, once connected, the main TUI control screen should load. This should look something like below:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-tui.png" alt="NUXBT TUI Connected" width="600">
+  <img src="docs/img/nuxbt-tui.png" alt="NUXBT TUI Connected" width="600">
 </div>
 
 There are two types of NUXBT TUI sessions:
@@ -378,9 +379,12 @@ This means that another service has already bound itself to the Control and Inte
 1. Allows for rebinding keys within the TUI and webapp
 2. Add a touchscreen input option for the webapp to enable input on smartphones
 3. Transition the webapp to a more maintainable React build
-4. ~~Allow for recording macros from direct input within the webapp~~
-5. ~~Allow for replaying recorded input~~
-6. Write a full testing suite
+4. Allow for recording macros from direct input over the TUI
+5. Locally store created macros, allowing for naming and reusing across sessions
+6. Package NUXBT as deb and rpm packages
+7. Create PPA for Ubuntu
+8. Create Flatpak
+9. Add support for Switch 2 controller emulation
 
 ### Plans that Need More Testing
 
