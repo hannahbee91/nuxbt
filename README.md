@@ -16,14 +16,20 @@
 
 </div>
 
-- [Key Features](#key-features)
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [Troubleshooting](#troubleshooting)
-- [Credits](#credits)
-- [License](#license)
+## Table of Contents
 
-![screenshot](https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-example.png)
+- [✨ Key Features](#key-features)
+- [📦 Installation](#installation)
+- [🚀 Getting Started](#getting-started)
+- [🌐 Using the Webapp](#using-the-webapp)
+- [💻 Using the TUI](#using-the-tui)
+- [🤖 Running Macros](#running-macros)
+- [🐍 Using the API](#using-the-api)
+- [🔧 Troubleshooting](#troubleshooting)
+- [🔮 Future Plans](#future-plans)
+- [🐛 Issues](#issues)
+- [👥 Credits](#credits)
+- [📄 License](#license)
 
 ## Key Features
 
@@ -46,7 +52,7 @@
 pip --user install nuxbt
 ```
 
-This will install NUXBT into your current Python environment. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
+This will install NUXBT into your current Python environment, for your user only. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
 
 ```bash
 alias nuxbt="sudo $(which nuxbt)"
@@ -124,7 +130,7 @@ The webapp itself will be locally accessible at `http://127.0.0.1:8000` or, if y
 You should see a webpage similar to the following image:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-webapp-start.png" alt="NUXBT Webapp Start Screen" width="600">
+  <img src="/docs/img/nuxbt-webapp-start.png" alt="NUXBT Webapp Start Screen" width="600">
 </div>
 
 To create and start a Pro Controller, click the Pro controller graphic. If creation/boot is successful, the website will switch to a loading screen. During this time, you should have the Nintendo Switch you wish to connect to powered on and within range of the host computer.
@@ -134,7 +140,7 @@ To create and start a Pro Controller, click the Pro controller graphic. If creat
 Once you've successfully connected to the Nintendo Switch, you should see a webpage similar to below:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-webapp-connected.png" alt="NUXBT Webapp Connected Screen" width="600">
+  <img src="/docs/img/nuxbt-webapp-connected.png" alt="NUXBT Webapp Connected Screen" width="600">
 </div>
 
 Here, you can change your input method, shutdown or restart the controller, and run an NUXBT macro.
@@ -159,7 +165,7 @@ nuxbt tui
 A loading screen should open and, once connected, the main TUI control screen should load. This should look something like below:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/hannahbee91/nuxbt/master/docs/img/nuxbt-tui.png" alt="NUXBT TUI Connected" width="600">
+  <img src="docs/img/nuxbt-tui.png" alt="NUXBT TUI Connected" width="600">
 </div>
 
 There are two types of NUXBT TUI sessions:
@@ -373,9 +379,12 @@ This means that another service has already bound itself to the Control and Inte
 1. Allows for rebinding keys within the TUI and webapp
 2. Add a touchscreen input option for the webapp to enable input on smartphones
 3. Transition the webapp to a more maintainable React build
-4. ~~Allow for recording macros from direct input within the webapp~~
-5. ~~Allow for replaying recorded input~~
-6. Write a full testing suite
+4. Allow for recording macros from direct input over the TUI
+5. Locally store created macros, allowing for naming and reusing across sessions
+6. Package NUXBT as deb and rpm packages
+7. Create PPA for Ubuntu
+8. Create Flatpak
+9. Add support for Switch 2 controller emulation
 
 ### Plans that Need More Testing
 
