@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.2.1 (2025-12-12)
+
+### Bug Fixes
+
+- **releases**: Fixed permissions for uploading build artifacts
+  ([#9](https://github.com/hannahbee91/nuxbt/pull/9),
+  [`ec41594`](https://github.com/hannahbee91/nuxbt/commit/ec4159493bfb3ae6eb364f414c249e965e7236ee))
+
+
 ## v1.2.0 (2025-12-12)
 
 ### Features
