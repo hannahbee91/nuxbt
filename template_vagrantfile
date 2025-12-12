@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/ubuntu2010"
+  config.vm.box = "generic/ubuntu2404"
 
   # Publically forwarded ports.
   # The below ports are accessible to all machines on the same network.
@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
   # Install NXBT
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y python3-pip bluez bluetooth pkg-config build-essential libdbus-glib-1-dev libgirepository1.0-dev
+    apt-get install -y python3-pip bluez bluetooth pkg-config build-essential libdbus-glib-1-dev libgirepository1.0-dev libcairo2-dev libgirepository-2.0-dev
     {{SHELL_CONFIG}}
   SHELL
 

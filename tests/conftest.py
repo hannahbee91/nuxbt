@@ -6,6 +6,8 @@ from unittest.mock import MagicMock
 sys.modules["dbus"] = MagicMock()
 sys.modules["dbus.mainloop.glib"] = MagicMock()
 sys.modules["dbus.service"] = MagicMock()
+# Mock bluez interaction to prevent system level changes during tests (PermissionError)
+sys.modules["nuxbt.bluez"] = MagicMock()
 
 @pytest.fixture
 def mock_bluetooth_adapters():

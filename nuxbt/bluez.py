@@ -134,8 +134,8 @@ def toggle_clean_bluez(toggle):
     else:
         try:
             os.remove(override_path)
-        except (FileNotFoundError, PermissionError):
-            # Override doesn't exist or we can't delete it
+        except FileNotFoundError:
+            # Override doesn't exist, no need to restart bluetooth
             return
 
     # Reload units
@@ -607,8 +607,8 @@ class BlueZ():
         :raises Exception: On inability to set class
         """
 
-        # if os.geteuid() != 0:
-        #     raise PermissionError("The device class must be set as root")
+        if os.geteuid() != 0:
+            raise PermissionError("The device class must be set as root")
 
         if len(device_class) != 8:
             raise ValueError("Device class must be length 8")

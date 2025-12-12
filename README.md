@@ -58,44 +58,11 @@ This will install NUXBT into your current Python environment, for your user only
 alias nuxbt="sudo $(which nuxbt)"
 ```
 
-**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`.
-If you wish to run NUXBT without sudo (rootless), please refer to the [Running without Root](#running-without-root) section.
+**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`. By using `which nuxbt`, we ensure that the alias points to the correct nuxbt executable, even if it's in a virtual environment.
 
 ### Windows and macOS
 
 See the installation guide [here.](docs/Windows-and-macOS-Installation.md)
-
-### Running without Root
-
-It is possible to run NUXBT without root privileges (sudo), but it requires some manual configuration to ensure NUXBT has access to the necessary system resources.
-
-1. **Grant Network Capabilities to Python**
-   NUXBT needs raw network access to communicate with the Bluetooth adapter. You can grant these capabilities to your Python interpreter:
-
-   ```bash
-   sudo setcap 'cap_net_raw,cap_net_admin+eip' $(readlink -f $(which python3))
-   ```
-   *Note: If you are using pyenv or a virtual environment, make sure to run this command on the specific python executable inside that environment.*
-
-2. **Disable the BlueZ Input Plugin**
-   NUXBT conflicts with the default BlueZ "Input" plugin (which handles standard Bluetooth keyboards/mice). When running with sudo, NUXBT disables this automatically. Without sudo, you must disable it manually.
-
-   **Option A: Edit Bluetooth Service Config (Permanent)**
-   Edit `/etc/bluetooth/main.conf` and find the `[General]` section. Add or modify the `DisablePlugins` line:
-   ```ini
-   [General]
-   DisablePlugins=input
-   ```
-   Then restart Bluetooth: `sudo systemctl restart bluetooth`
-
-   **Option B: Manual Service Start (Temporary)**
-   Stop the system Bluetooth service and start the daemon manually without the input plugin:
-   ```bash
-   sudo systemctl stop bluetooth
-   sudo bluetoothd -P input -E &
-   ```
-
-Once these steps are complete, you can run `nuxbt` commands without `sudo`!
 
 ## Getting Started
 
@@ -346,12 +313,12 @@ nx.clear_all_macros()
 
 ## Troubleshooting
 
-### I get an error when installing the `dbus-python` package
+### I get an error when installing the `dbus-python` or `PyGObject` package
 
-This error can occur due to missing dbus-related libraries on some Linux distributions. To fix this in most cases, `libdbus-glib-1-dev` and `libdbus-1-dev` need to be installed with your system's package manager. For systems using aptitude for package management (Ubuntu, Debian, etc), installation instructions follow:
+This error can occur due to missing dbus-related libraries or GObject introspection headers on some Linux distributions (especially Ubuntu 24.04+). To fix this, `libdbus-glib-1-dev`, `libdbus-1-dev`, `libcairo2-dev`, and `libgirepository-2.0-dev` (or `libgirepository1.0-dev` on older systems) need to be installed with your system's package manager. For systems using aptitude for package management (Ubuntu, Debian, etc), installation instructions follow:
 
 ```bash
-sudo apt-get install libdbus-glib-1-dev libdbus-1-dev
+sudo apt-get install libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev pkg-config
 ```
 
 ### My controller disconnects after exiting the "Change Grip/Order" Menu
