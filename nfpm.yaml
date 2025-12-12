@@ -24,11 +24,14 @@ overrides:
     - libdbus-1-3
     - libcairo2
     - libgirepository-1.0-1
+    - python3.12
+    - python3.12-venv
   rpm:
     depends:
     - dbus-libs
     - cairo
     - gobject-introspection
+    - python3.12
 deb:
   scripts:
   triggers:
