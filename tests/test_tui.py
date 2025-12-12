@@ -129,6 +129,10 @@ class TestControllerTUI(unittest.TestCase):
 class TestInputTUI(unittest.TestCase):
     @patch('nuxbt.tui.Nxbt')
     def setUp(self, MockNxbt):
+        # Mock pynput to prevent SystemExit on import failure in CI/headless envs
+        self.pynput_patcher = patch.dict('sys.modules', {'pynput': MagicMock(), 'pynput.keyboard': MagicMock()})
+        self.pynput_patcher.start()
+
         self.mock_nxbt = MockNxbt.return_value
         self.mock_nxbt.create_controller.return_value = 0
         
@@ -140,6 +144,7 @@ class TestInputTUI(unittest.TestCase):
 
     def tearDown(self):
         self.patcher.stop()
+        self.pynput_patcher.stop()
 
     def test_initialization(self):
         self.assertIsNone(self.input_tui.reconnect_target)
