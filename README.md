@@ -58,44 +58,11 @@ This will install NUXBT into your current Python environment, for your user only
 alias nuxbt="sudo $(which nuxbt)"
 ```
 
-**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`.
-If you wish to run NUXBT without sudo (rootless), please refer to the [Running without Root](#running-without-root) section.
+**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`. By using `which nuxbt`, we ensure that the alias points to the correct nuxbt executable, even if it's in a virtual environment.
 
 ### Windows and macOS
 
 See the installation guide [here.](docs/Windows-and-macOS-Installation.md)
-
-### Running without Root
-
-It is possible to run NUXBT without root privileges (sudo), but it requires some manual configuration to ensure NUXBT has access to the necessary system resources.
-
-1. **Grant Network Capabilities to Python**
-   NUXBT needs raw network access to communicate with the Bluetooth adapter. You can grant these capabilities to your Python interpreter:
-
-   ```bash
-   sudo setcap 'cap_net_raw,cap_net_admin+eip' $(readlink -f $(which python3))
-   ```
-   *Note: If you are using pyenv or a virtual environment, make sure to run this command on the specific python executable inside that environment.*
-
-2. **Disable the BlueZ Input Plugin**
-   NUXBT conflicts with the default BlueZ "Input" plugin (which handles standard Bluetooth keyboards/mice). When running with sudo, NUXBT disables this automatically. Without sudo, you must disable it manually.
-
-   **Option A: Edit Bluetooth Service Config (Permanent)**
-   Edit `/etc/bluetooth/main.conf` and find the `[General]` section. Add or modify the `DisablePlugins` line:
-   ```ini
-   [General]
-   DisablePlugins=input
-   ```
-   Then restart Bluetooth: `sudo systemctl restart bluetooth`
-
-   **Option B: Manual Service Start (Temporary)**
-   Stop the system Bluetooth service and start the daemon manually without the input plugin:
-   ```bash
-   sudo systemctl stop bluetooth
-   sudo bluetoothd -P input -E &
-   ```
-
-Once these steps are complete, you can run `nuxbt` commands without `sudo`!
 
 ## Getting Started
 

@@ -169,21 +169,12 @@ class Nxbt():
 
 
 
-        # Handle legacy log_to_file argument if provided and log_file_path is not
         if log_to_file and log_file_path is None:
             log_file_path = True
+        
+        self.debug = debug
 
-        if log_file_path is True:
-            log_file_path = "nuxbt.log"
-
-        if disable_logging:
-            log_handler = logging.NullHandler()
-        elif log_to_file or log_file_path:
-            log_handler = logging.FileHandler(log_file_path or "nuxbt.log")
-        else:
-            log_handler = None
-
-        create_logger(debug, log_handler)
+        create_logger(debug=debug, log_file_path=log_file_path, disable_logging=disable_logging)
         self.logger = logging.getLogger('nuxbt')
         self._check_bluez_version()
 
@@ -244,7 +235,7 @@ class Nxbt():
         if hasattr(self, "controllers") and self.controllers.is_alive():
             self.controllers.terminate()
 
-        self.resource_manager.shutdown()
+        self.manager.shutdown()
 
         # Re-enable the BlueZ plugins, if we have permission
         toggle_clean_bluez(False)
