@@ -346,12 +346,12 @@ nx.clear_all_macros()
 
 ## Troubleshooting
 
-### I get an error when installing the `dbus-python` package
+### I get an error when installing the `dbus-python` or `PyGObject` package
 
-This error can occur due to missing dbus-related libraries on some Linux distributions. To fix this in most cases, `libdbus-glib-1-dev` and `libdbus-1-dev` need to be installed with your system's package manager. For systems using aptitude for package management (Ubuntu, Debian, etc), installation instructions follow:
+This error can occur due to missing dbus-related libraries or GObject introspection headers on some Linux distributions (especially Ubuntu 24.04+). To fix this, `libdbus-glib-1-dev`, `libdbus-1-dev`, `libcairo2-dev`, and `libgirepository-2.0-dev` (or `libgirepository1.0-dev` on older systems) need to be installed with your system's package manager. For systems using aptitude for package management (Ubuntu, Debian, etc), installation instructions follow:
 
 ```bash
-sudo apt-get install libdbus-glib-1-dev libdbus-1-dev
+sudo apt-get install libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev pkg-config
 ```
 
 ### My controller disconnects after exiting the "Change Grip/Order" Menu

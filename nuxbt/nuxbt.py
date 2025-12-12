@@ -7,6 +7,8 @@ import os
 import sys
 import time
 import json
+import logging
+import subprocess
 
 import dbus
 
@@ -17,6 +19,7 @@ from .bluez import replace_mac_addresses
 from .bluez import find_devices_by_alias
 from .bluez import SERVICE_NAME, ADAPTER_INTERFACE
 from .logging import create_logger
+from .agent import run_agent_loop
 
 
 JOYCON_L = ControllerTypes.JOYCON_L
@@ -137,23 +140,52 @@ class Nxbt():
     This allows for thread-safe control of emulated controllers.
     """
 
-    def __init__(self, debug=False, log_to_file=False, disable_logging=False):
+    def _check_bluez_version(self):
+        """Checks the BlueZ version installed on the system."""
+        try:
+            # Check bluetoothd version
+            result = subprocess.run(['bluetoothd', '-v'], capture_output=True, text=True)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                self.logger.info(f"BlueZ version: {version}")
+        except FileNotFoundError:
+            self.logger.warning("Could not find bluetoothd executable. Is BlueZ installed?")
+        except Exception as e:
+            self.logger.warning(f"Could not check BlueZ version: {e}")
+
+    def __init__(self, debug=False, log_file_path=None, disable_logging=False, log_to_file=False):
         """Initializes the necessary multiprocessing resources and starts
         the multiprocessing processes.
 
         :param debug: Enables the debugging functionality of
         nuxbt, defaults to False
         :type debug: bool, optional
-        :param log_to_file: A boolean value that indiciates whether or not
-        a log should be saved to the current working directory, defaults to False
-        :type log_to_file: bool, optional
+        :param log_file_path: A path to a file to log to. If set to True,
+        logs to a default file.
+        :type log_file_path: str or bool, optional
         :param disable_logging: Routes all logging calls to a null log handler.
         :type disable_logging: bool, optional, defaults to False.
         """
 
-        self.debug = debug
-        self.logger = create_logger(
-            debug=self.debug, log_to_file=log_to_file, disable_logging=disable_logging)
+
+
+        # Handle legacy log_to_file argument if provided and log_file_path is not
+        if log_to_file and log_file_path is None:
+            log_file_path = True
+
+        if log_file_path is True:
+            log_file_path = "nuxbt.log"
+
+        if disable_logging:
+            log_handler = logging.NullHandler()
+        elif log_to_file or log_file_path:
+            log_handler = logging.FileHandler(log_file_path or "nuxbt.log")
+        else:
+            log_handler = None
+
+        create_logger(debug, log_handler)
+        self.logger = logging.getLogger('nuxbt')
+        self._check_bluez_version()
 
         # Main queue for nbxt tasks
         self.task_queue = Queue()
@@ -162,11 +194,11 @@ class Nxbt():
         self._bluetooth_lock = Lock()
 
         # Creates/manages shared resources
-        self.resource_manager = Manager()
+        self.manager = Manager()
         # Shared dictionary for viewing overall nuxbt state.
         # Should treated as read-only except by
         # the main nuxbt multiprocessing process.
-        self.manager_state = self.resource_manager.dict()
+        self.manager_state = self.manager.dict()
         self.manager_state_lock = Lock()
 
         # Shared, controller management properties.
@@ -178,12 +210,7 @@ class Nxbt():
 
         # Disable the BlueZ input plugin so we can use the
         # HID control/interrupt Bluetooth ports
-        try:
-            toggle_clean_bluez(True)
-        except PermissionError:
-            self.logger.warning("Unable to toggle BlueZ plugins. Please ensure the Input plugin is disabled manually.")
-        except Exception as e:
-            self.logger.warning(f"Failed to toggle BlueZ plugins: {e}")
+        toggle_clean_bluez(True)
 
         # Exit handler
         atexit.register(self._on_exit)
@@ -197,6 +224,13 @@ class Nxbt():
         # we need to cleanup on exit.
         self.controllers.daemon = False
         self.controllers.start()
+
+        # Start the BlueZ Agent process
+        self.agent_process = Process(target=run_agent_loop)
+        self.agent_process.daemon = True # Daemonize to kill with parent
+        self.agent_process.start()
+
+
 
     def _on_exit(self):
         """The exit handler function used with the atexit module.
@@ -213,12 +247,7 @@ class Nxbt():
         self.resource_manager.shutdown()
 
         # Re-enable the BlueZ plugins, if we have permission
-        try:
-            toggle_clean_bluez(False)
-        except PermissionError:
-            pass
-        except Exception:
-            pass
+        toggle_clean_bluez(False)
 
     def _command_manager(self, task_queue, state):
         """Used as the main multiprocessing Process that is launched

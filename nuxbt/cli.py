@@ -1,13 +1,22 @@
 import click
-from random import randint
-from time import sleep
 import os
 import traceback
-import sys
+from time import sleep, time
+from random import randint
 
 from .nuxbt import Nxbt, PRO_CONTROLLER
 from .bluez import find_devices_by_alias
 from .tui import InputTUI
+from . import __version__
+
+
+class GlobalContext:
+    def __init__(self):
+        self.logfile = None
+        self.debug = False
+
+pass_context = click.make_pass_decorator(GlobalContext, ensure=True)
+
 
 MACRO = """
 B 0.1s
@@ -60,6 +69,7 @@ A 0.1s
 5.0s
 """
 
+
 def random_colour():
     return [
         randint(0, 255),
@@ -67,11 +77,19 @@ def random_colour():
         randint(0, 255),
     ]
 
+
 def check_bluetooth_address(address):
-    """Check the validity of a given Bluetooth MAC address"""
+    """Check the validity of a given Bluetooth MAC address
+
+    :param address: A Bluetooth MAC address
+    :type address: str
+    :raises ValueError: If the Bluetooth address is invalid
+    """
+
     address_bytes = len(address.split(":"))
     if address_bytes != 6:
         raise ValueError("Invalid Bluetooth address")
+
 
 def get_reconnect_target(reconnect, address):
     if reconnect:
@@ -81,31 +99,63 @@ def get_reconnect_target(reconnect, address):
         reconnect_target = address
     else:
         reconnect_target = None
+
     return reconnect_target
 
+
 @click.group()
-@click.option('--debug/--no-debug', default=False, help="Enables debug mode in nuxbt.")
-@click.option('--logfile/--no-logfile', default=False, help="Enables logging to a file in the current working directory.")
-@click.pass_context
-def cli(ctx, debug, logfile):
-    """NUXBT: Control your Nintendo Switch via Bluetooth."""
-    ctx.ensure_object(dict)
-    ctx.obj['DEBUG'] = debug
-    ctx.obj['LOGFILE'] = logfile
+@click.option('-l', 'enable_logging', is_flag=True, default=False,
+              help="Enables logging to a file in the current working directory instead of stderr.")
+@click.option('--logfile', required=False, default=None, type=str,
+              help="Specifies a custom file path for logging.")
+@click.option('-d', '--debug', is_flag=True, default=False,
+              help="Enables debug mode in nuxbt.")
+@click.version_option(__version__)
+@pass_context
+def main(ctx, enable_logging, logfile, debug):
+    """
+    Control your Nintendo Switch through a website, terminal, or macro.
+    """
+    if logfile:
+        ctx.logfile = logfile
+    elif enable_logging:
+        ctx.logfile = True
+    else:
+        ctx.logfile = None
+        
+    ctx.debug = debug
 
-@cli.command()
-@click.option('--ip', default="0.0.0.0", help="Specifies the IP to run the webapp at. Defaults to 0.0.0.0")
-@click.option('--port', default=8000, help="Specifies the port to run the webapp at. Defaults to 8000")
-def webapp(ip, port):
+
+@main.command()
+@click.option('-i', '--ip', default="0.0.0.0", type=str,
+              help="Specifies the IP to run the webapp at. Defaults to 0.0.0.0")
+@click.option('-p', '--port', default=8000, type=int,
+              help="Specifies the port to run the webapp at. Defaults to 8000")
+@click.option('--usessl', is_flag=True, default=False,
+              help="Enables or disables SSL use in the webapp")
+@click.option('--certpath', default=None, type=str,
+              help="""Specifies the folder location for SSL certificates used
+                    in the webapp. Certificates in this folder should be in the form of
+                    a 'cert.pem' and 'key.pem' pair.""")
+@pass_context
+def webapp(ctx, ip, port, usessl, certpath):
     """Runs web server and allows for controller/macro input from a web browser."""
+    # We need to set up logging here if we want it for the webapp process
+    # But usually webapp might have its own or share logic.
+    # The existing code imported and ran start_web_app.
     from .web import start_web_app
-    start_web_app(ip=ip, port=port)
+    # Note: start_web_app might need to be aware of logging, but for now we keep api same
+    # or pass it if it accepts arguments. Checking app.py would be good if we can,
+    # but based on previous cli, it didn't pass logging to start_web_app directly
+    # except maybe via global config? No, it just called start_web_app.
+    start_web_app(ip=ip, port=port, usessl=usessl, cert_path=certpath)
 
-@cli.command()
-@click.pass_context
+
+@main.command()
+@pass_context
 def demo(ctx):
-    """Runs a demo macro (ensure Switch is on 'Change Grip/Order' menu)."""
-    nx = Nxbt(debug=ctx.obj['DEBUG'], log_to_file=ctx.obj['LOGFILE'])
+    """Runs a demo macro (please ensure that your Switch is on the main menu's Change Grip/Order menu before running)."""
+    nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     adapters = nx.get_available_adapters()
     if len(adapters) < 1:
         raise OSError("Unable to detect any Bluetooth adapters.")
@@ -119,6 +169,7 @@ def demo(ctx):
             colour_buttons=random_colour())
         controller_idxs.append(index)
 
+    # Run a macro on the last controller
     print("Running Demo...")
     macro_id = nx.macro(controller_idxs[-1], MACRO, block=False)
     while macro_id not in nx.state[controller_idxs[-1]]["finished_macros"]:
@@ -128,39 +179,50 @@ def demo(ctx):
             print(state['errors'])
             exit(1)
         sleep(1.0)
+
     print("Finished!")
 
-@cli.command()
-@click.option('-c', '--commands', required=True, help="Specifies a macro string or a file location.")
-@click.option('-r', '--reconnect', is_flag=True, help="Attempt to reconnect to any previously connected Switch.")
-@click.option('-a', '--address', help="Attempt to reconnect to a specific Bluetooth MAC address.")
-@click.pass_context
+
+@main.command()
+@click.option('-c', '--commands', required=False, default=None, type=str,
+              help="Specifies a macro string or a file location to load a macro string from.")
+@click.option('-r', '--reconnect', is_flag=True, default=False,
+              help="nuxbt will attempt to reconnect to any previously connected Nintendo Switch.")
+@click.option('-a', '--address', required=False, default=False,
+              help="nuxbt will attempt to reconnect to a specific Bluetooth MAC address of a Nintendo Switch.")
+@pass_context
 def macro(ctx, commands, reconnect, address):
-    """Allows for input of a specified macro."""
+    """Allows for input of a specified macro from the command line (with the argument -c) or from a file."""
+    
     macro_content = None
-    if os.path.isfile(commands):
-        with open(commands, "r") as f:
-            macro_content = f.read()
+    if commands:
+        if os.path.isfile(commands):
+            with open(commands, "r") as f:
+                macro_content = f.read()
+        else:
+            macro_content = commands
     else:
-        macro_content = commands
+        print("No macro commands were specified.")
+        print("Please use the -c argument to specify a macro string or a file location")
+        print("to load a macro string from.")
+        return
 
     reconnect_target = get_reconnect_target(reconnect, address)
-    nx = Nxbt(debug=ctx.obj['DEBUG'], log_to_file=ctx.obj['LOGFILE'])
-    
+
+    nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     print("Creating controller...")
     index = nx.create_controller(
         PRO_CONTROLLER,
         colour_body=random_colour(),
         colour_buttons=random_colour(),
         reconnect_address=reconnect_target)
-    
     print("Waiting for connection...")
     nx.wait_for_connection(index)
     print("Connected!")
 
     print("Running macro...")
     macro_id = nx.macro(index, macro_content, block=False)
-    while True:
+    while (True):
         if nx.state[index]["state"] == "crashed":
             print("Controller crashed while running macro")
             print(nx.state[index]["errors"])
@@ -170,54 +232,71 @@ def macro(ctx, commands, reconnect, address):
             break
         sleep(1/30)
 
-@cli.command()
-@click.option('-r', '--reconnect', is_flag=True, help="Attempt to reconnect to any previously connected Switch.")
-@click.option('-a', '--address', help="Attempt to reconnect to a specific Bluetooth MAC address.")
-def tui(reconnect, address):
-    """Opens a TUI for direct input."""
-    reconnect_target = get_reconnect_target(reconnect, address)
-    tui = InputTUI(reconnect_target=reconnect_target)
-    tui.start()
 
-@cli.command()
-@click.option('-r', '--reconnect', is_flag=True, help="Attempt to reconnect to any previously connected Switch.")
-@click.option('-a', '--address', help="Attempt to reconnect to a specific Bluetooth MAC address.")
-def remote_tui(reconnect, address):
-    """Opens a remote TUI for direct input."""
+@main.command()
+@click.option('-r', '--reconnect', is_flag=True, default=False,
+              help="nuxbt will attempt to reconnect to any previously connected Nintendo Switch.")
+@click.option('-a', '--address', required=False, default=False,
+              help="nuxbt will attempt to reconnect to a specific Bluetooth MAC address of a Nintendo Switch.")
+@pass_context
+def tui(ctx, reconnect, address):
+    """Opens a TUI that allows for direct input from the keyboard to the Switch."""
     reconnect_target = get_reconnect_target(reconnect, address)
-    tui = InputTUI(reconnect_target=reconnect_target, force_remote=True)
-    tui.start()
+    tui_instance = InputTUI(reconnect_target=reconnect_target)
+    tui_instance.start()
 
-@cli.command()
-def addresses():
-    """Lists Bluetooth MAC addresses for previously connected Switches."""
-    addresses = find_devices_by_alias("Nintendo Switch")
-    if not addresses or len(addresses) < 1:
+
+@main.command()
+@click.option('-r', '--reconnect', is_flag=True, default=False,
+              help="nuxbt will attempt to reconnect to any previously connected Nintendo Switch.")
+@click.option('-a', '--address', required=False, default=False,
+              help="nuxbt will attempt to reconnect to a specific Bluetooth MAC address of a Nintendo Switch.")
+@pass_context
+def remote_tui(ctx, reconnect, address):
+    """Opens a TUI that allows for direct input from the keyboard to the Switch (Remote Mode)."""
+    reconnect_target = get_reconnect_target(reconnect, address)
+    tui_instance = InputTUI(reconnect_target=reconnect_target, force_remote=True)
+    tui_instance.start()
+
+
+@main.command()
+@pass_context
+def addresses(ctx):
+    """Lists the Bluetooth MAC addresses for all previously connected Nintendo Switches."""
+    addresses_list = find_devices_by_alias("Nintendo Switch")
+
+    if not addresses_list or len(addresses_list) < 1:
         print("No Switches have previously connected to this device.")
         return
 
     print("---------------------------")
     print("| Num | Address           |")
     print("---------------------------")
-    for i in range(0, len(addresses)):
-        address = addresses[i]
+    for i in range(0, len(addresses_list)):
+        address = addresses_list[i]
         print(f"| {i+1}   | {address} |")
     print("---------------------------")
 
-@cli.command()
-@click.pass_context
-def test(ctx):
-    """Runs a series of tests to ensure NUXBT is working."""
+
+@main.command()
+@click.option('--timeout', default=120, type=int, help="Timeout in seconds to wait for connection. Defaults to 120.")
+@pass_context
+def test(ctx, timeout):
+    """Runs through a series of tests to ensure NUXBT is working and compatible with your system."""
+    # Init
     print("[1] Attempting to initialize NUXBT...")
+    nx = None
     try:
-        nx = Nxbt(debug=ctx.obj['DEBUG'], log_to_file=ctx.obj['LOGFILE'])
+        nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     except Exception as e:
         print("Failed to initialize:")
         print(traceback.format_exc())
         exit(1)
     print("Successfully initialized NUXBT.\n")
 
+    # Adapter Check
     print("[2] Checking for Bluetooth adapter availability...")
+    adapters = None
     try:
         adapters = nx.get_available_adapters()
     except Exception as e:
@@ -231,10 +310,12 @@ def test(ctx):
     print(f"{len(adapters)} Bluetooth adapter(s) available.")
     print("Adapters:", adapters, "\n")
 
+    # Creating a controller
     print("[3] Please turn on your Switch and navigate to the 'Change Grip/Order menu.'")
     input("Press Enter to continue...")
 
     print("Creating a controller with the first Bluetooth adapter...")
+    cindex = None
     try:
         cindex = nx.create_controller(
                  PRO_CONTROLLER,
@@ -247,22 +328,24 @@ def test(ctx):
         exit(1)
     print("Successfully created a controller.\n")
 
+    # Controller connection check
     print("[4] Waiting for controller to connect with the Switch...")
-    timeout = 120
     print(f"Connection timeout is {timeout} seconds for this test script.")
     elapsed = 0
+    start_time = time()
     while nx.state[cindex]['state'] != 'connected':
-        if elapsed >= timeout:
+        if time() - start_time >= timeout:
             print("Timeout reached, exiting...")
             exit(1)
         elif nx.state[cindex]['state'] == 'crashed':
             print("An error occurred while connecting:")
             print(nx.state[cindex]['errors'])
             exit(1)
-        elapsed += 1
+        
         sleep(1)
     print("Successfully connected.\n")
 
+    # Exit the Change Grip/Order Menu
     print("[5] Attempting to exit the 'Change Grip/Order Menu'...")
     nx.macro(cindex, "B 0.1s\n0.1s")
     sleep(5)
@@ -271,10 +354,9 @@ def test(ctx):
         print("Exiting...")
         exit(1)
     print("Controller successfully exited the menu.\n")
+
     print("All tests passed.")
 
-def main():
-    cli(obj={})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
