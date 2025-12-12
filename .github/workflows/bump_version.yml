@@ -9,6 +9,8 @@ on:
       - 'pyproject.toml'
       - 'poetry.lock'
       - 'MANIFEST.in'
+      - 'nfpm.yaml'
+      - '.github/workflows/release.yml'
 
 jobs:
   bump-version:
