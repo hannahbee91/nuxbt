@@ -1,0 +1,45 @@
+nuxbt (1.2.2-7) noble; urgency=medium
+
+  * Patch maintainer scripts (postinst) to use correct install path (/usr/lib/nuxbt).
+  * Fix shebangs in binaries after moving virtualenv.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 13:10:00 -0800
+
+nuxbt (1.2.2-6) noble; urgency=medium
+
+  * Use system site packages for PyGObject, dbus-python, pycairo, evdev.
+  * Enable --system-site-packages in dh-virtualenv.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 12:55:00 -0800
+
+nuxbt (1.2.2-5) noble; urgency=medium
+
+  * Fix argument passing to dh-virtualenv (split pip args).
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 12:40:00 -0800
+
+nuxbt (1.2.2-4) noble; urgency=medium
+
+  * Vendor dependencies in wheels/ directory.
+  * Use local wheels for installation (offline build).
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 12:20:00 -0800
+
+nuxbt (1.2.2-3) noble; urgency=medium
+
+  * Add python3-poetry-core to Build-Depends.
+  * Disable pip build isolation to use system poetry-core.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 12:10:00 -0800
+
+nuxbt (1.2.2-2) noble; urgency=medium
+
+  * Fix virtualenv installation path.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 13 Dec 2025 12:00:00 -0800
+
+nuxbt (1.2.2-1) noble; urgency=medium
+
+  * Initial release from PPA.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Thu, 12 Dec 2025 12:00:00 -0800

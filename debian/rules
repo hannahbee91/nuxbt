@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python-virtualenv
+
+override_dh_virtualenv:
+	dh_virtualenv --python=/usr/bin/python3 --extra-pip-arg="--no-index" --extra-pip-arg="--find-links=wheels" --extra-virtualenv-arg="--system-site-packages"
+	mkdir -p debian/nuxbt/usr/lib
+	# Move the venv from default location to /usr/lib/nuxbt
+	mv debian/nuxbt/opt/venvs/nuxbt debian/nuxbt/usr/lib/nuxbt
+	rm -rf debian/nuxbt/opt
+	# Fix shebangs in the moved venv
+	find debian/nuxbt/usr/lib/nuxbt/bin -type f -exec sed -i 's|/opt/venvs/nuxbt|/usr/lib/nuxbt|g' {} +
+override_dh_installdeb:
+	dh_installdeb
+	# Patch the maintainer scripts to use correct path
+	sed -i 's|/opt/venvs/nuxbt|/usr/lib/nuxbt|g' debian/nuxbt/DEBIAN/postinst || true
+	sed -i 's|/opt/venvs/nuxbt|/usr/lib/nuxbt|g' debian/nuxbt/DEBIAN/prerm || true
+	sed -i 's|/opt/venvs/nuxbt|/usr/lib/nuxbt|g' debian/nuxbt/DEBIAN/postrm || true
