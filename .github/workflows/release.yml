@@ -110,7 +110,7 @@ jobs:
              dch -v "$VERSION-1" --distribution noble "New release $VERSION"
              
              # Extract changes from CHANGELOG.md and append them
-             awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | while IFS= read -r line; do
+             awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | sed 's/^[-*] //g' | while IFS= read -r line; do
                 dch -a "$line"
              done
 
