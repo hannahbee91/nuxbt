@@ -1,0 +1,363 @@
+[detached HEAD da5a657] Update changelog for 1.4.1 [skip ci]
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+Vendoring dependencies...
+Ignoring ansicon: markers 'python_version >= "3.11" and python_version < "4.0" and platform_system == "Windows"' don't match your environment
+Ignoring colorama: markers 'python_version >= "3.11" and python_version < "4.0" and platform_system == "Windows"' don't match your environment
+Ignoring jinxed: markers 'python_version >= "3.11" and python_version < "4.0" and platform_system == "Windows"' don't match your environment
+Ignoring pyobjc-core: markers 'python_version >= "3.11" and python_version < "4.0" and sys_platform == "darwin"' don't match your environment
+Ignoring pyobjc-framework-applicationservices: markers 'python_version >= "3.11" and python_version < "4.0" and sys_platform == "darwin"' don't match your environment
+Ignoring pyobjc-framework-cocoa: markers 'python_version >= "3.11" and python_version < "4.0" and sys_platform == "darwin"' don't match your environment
+Ignoring pyobjc-framework-coretext: markers 'python_version >= "3.11" and python_version < "4.0" and sys_platform == "darwin"' don't match your environment
+Ignoring pyobjc-framework-quartz: markers 'python_version >= "3.11" and python_version < "4.0" and sys_platform == "darwin"' don't match your environment
+Collecting poetry-core
+  Using cached poetry_core-2.2.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting setuptools
+  Using cached setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel
+  Using cached wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Collecting pip
+  Downloading pip-25.3-py3-none-any.whl.metadata (4.7 kB)
+Collecting a2wsgi==1.10.10 (from -r requirements.txt (line 1))
+  Using cached a2wsgi-1.10.10-py3-none-any.whl.metadata (4.0 kB)
+Collecting bidict==0.23.1 (from -r requirements.txt (line 3))
+  Using cached bidict-0.23.1-py3-none-any.whl.metadata (8.7 kB)
+Collecting blessed==1.25.0 (from -r requirements.txt (line 4))
+  Using cached blessed-1.25.0-py3-none-any.whl.metadata (13 kB)
+Collecting blinker==1.9.0 (from -r requirements.txt (line 5))
+  Using cached blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting cffi==2.0.0 (from -r requirements.txt (line 6))
+  Using cached cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+Collecting click==8.3.1 (from -r requirements.txt (line 7))
+  Using cached click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting cryptography==46.0.3 (from -r requirements.txt (line 9))
+  Using cached cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+Collecting dbus-python==1.4.0 (from -r requirements.txt (line 10))
+  Using cached dbus-python-1.4.0.tar.gz (232 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting evdev==1.9.2 (from -r requirements.txt (line 11))
+  Using cached evdev-1.9.2.tar.gz (33 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting flask-socketio==5.5.1 (from -r requirements.txt (line 12))
+  Using cached Flask_SocketIO-5.5.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting flask==3.1.2 (from -r requirements.txt (line 13))
+  Using cached flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+Collecting h11==0.16.0 (from -r requirements.txt (line 14))
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting itsdangerous==2.2.0 (from -r requirements.txt (line 15))
+  Using cached itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting jinja2==3.1.6 (from -r requirements.txt (line 16))
+  Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting markupsafe==3.0.3 (from -r requirements.txt (line 18))
+  Using cached markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting psutil==7.1.3 (from -r requirements.txt (line 19))
+  Using cached psutil-7.1.3-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (23 kB)
+Collecting pycairo==1.29.0 (from -r requirements.txt (line 20))
+  Using cached pycairo-1.29.0.tar.gz (665 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting pycparser==2.23 (from -r requirements.txt (line 21))
+  Using cached pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+Collecting pygobject==3.54.5 (from -r requirements.txt (line 22))
+  Using cached pygobject-3.54.5.tar.gz (1.3 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting pynput==1.8.1 (from -r requirements.txt (line 23))
+  Using cached pynput-1.8.1-py2.py3-none-any.whl.metadata (32 kB)
+Collecting python-engineio==4.12.3 (from -r requirements.txt (line 29))
+  Using cached python_engineio-4.12.3-py3-none-any.whl.metadata (2.2 kB)
+Collecting python-socketio==5.15.0 (from -r requirements.txt (line 30))
+  Using cached python_socketio-5.15.0-py3-none-any.whl.metadata (3.2 kB)
+Collecting python-xlib==0.33 (from -r requirements.txt (line 31))
+  Using cached python_xlib-0.33-py2.py3-none-any.whl.metadata (6.2 kB)
+Collecting simple-websocket==1.1.0 (from -r requirements.txt (line 32))
+  Using cached simple_websocket-1.1.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting six==1.17.0 (from -r requirements.txt (line 33))
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting uvicorn==0.38.0 (from -r requirements.txt (line 34))
+  Using cached uvicorn-0.38.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting wcwidth==0.2.14 (from -r requirements.txt (line 35))
+  Using cached wcwidth-0.2.14-py2.py3-none-any.whl.metadata (15 kB)
+Collecting werkzeug==3.1.4 (from -r requirements.txt (line 36))
+  Using cached werkzeug-3.1.4-py3-none-any.whl.metadata (4.0 kB)
+Collecting wsproto==1.3.2 (from -r requirements.txt (line 37))
+  Using cached wsproto-1.3.2-py3-none-any.whl.metadata (5.2 kB)
+Using cached a2wsgi-1.10.10-py3-none-any.whl (17 kB)
+Using cached bidict-0.23.1-py3-none-any.whl (32 kB)
+Using cached blessed-1.25.0-py3-none-any.whl (95 kB)
+Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Using cached cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+Using cached click-8.3.1-py3-none-any.whl (108 kB)
+Using cached cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+Using cached Flask_SocketIO-5.5.1-py3-none-any.whl (18 kB)
+Using cached flask-3.1.2-py3-none-any.whl (103 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Using cached markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Using cached psutil-7.1.3-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (263 kB)
+Using cached pycparser-2.23-py3-none-any.whl (118 kB)
+Using cached pynput-1.8.1-py2.py3-none-any.whl (91 kB)
+Using cached python_engineio-4.12.3-py3-none-any.whl (59 kB)
+Using cached python_socketio-5.15.0-py3-none-any.whl (79 kB)
+Using cached python_xlib-0.33-py2.py3-none-any.whl (182 kB)
+Using cached simple_websocket-1.1.0-py3-none-any.whl (13 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached uvicorn-0.38.0-py3-none-any.whl (68 kB)
+Using cached wcwidth-0.2.14-py2.py3-none-any.whl (37 kB)
+Using cached werkzeug-3.1.4-py3-none-any.whl (224 kB)
+Using cached wsproto-1.3.2-py3-none-any.whl (24 kB)
+Using cached poetry_core-2.2.1-py3-none-any.whl (338 kB)
+Using cached setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+Using cached wheel-0.45.1-py3-none-any.whl (72 kB)
+Downloading pip-25.3-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 87.1 MB/s  0:00:00
+Saved ./wheels/a2wsgi-1.10.10-py3-none-any.whl
+Saved ./wheels/bidict-0.23.1-py3-none-any.whl
+Saved ./wheels/blessed-1.25.0-py3-none-any.whl
+Saved ./wheels/blinker-1.9.0-py3-none-any.whl
+Saved ./wheels/cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+Saved ./wheels/click-8.3.1-py3-none-any.whl
+Saved ./wheels/cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl
+Saved ./wheels/dbus-python-1.4.0.tar.gz
+Saved ./wheels/evdev-1.9.2.tar.gz
+Saved ./wheels/Flask_SocketIO-5.5.1-py3-none-any.whl
+Saved ./wheels/flask-3.1.2-py3-none-any.whl
+Saved ./wheels/h11-0.16.0-py3-none-any.whl
+Saved ./wheels/itsdangerous-2.2.0-py3-none-any.whl
+Saved ./wheels/jinja2-3.1.6-py3-none-any.whl
+Saved ./wheels/markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+Saved ./wheels/psutil-7.1.3-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl
+Saved ./wheels/pycairo-1.29.0.tar.gz
+Saved ./wheels/pycparser-2.23-py3-none-any.whl
+Saved ./wheels/pygobject-3.54.5.tar.gz
+Saved ./wheels/pynput-1.8.1-py2.py3-none-any.whl
+Saved ./wheels/python_engineio-4.12.3-py3-none-any.whl
+Saved ./wheels/python_socketio-5.15.0-py3-none-any.whl
+Saved ./wheels/python_xlib-0.33-py2.py3-none-any.whl
+Saved ./wheels/simple_websocket-1.1.0-py3-none-any.whl
+Saved ./wheels/six-1.17.0-py2.py3-none-any.whl
+Saved ./wheels/uvicorn-0.38.0-py3-none-any.whl
+Saved ./wheels/wcwidth-0.2.14-py2.py3-none-any.whl
+Saved ./wheels/werkzeug-3.1.4-py3-none-any.whl
+Saved ./wheels/wsproto-1.3.2-py3-none-any.whl
+Saved ./wheels/poetry_core-2.2.1-py3-none-any.whl
+Saved ./wheels/setuptools-80.9.0-py3-none-any.whl
+Saved ./wheels/wheel-0.45.1-py3-none-any.whl
+Saved ./wheels/pip-25.3-py3-none-any.whl
+Successfully downloaded a2wsgi bidict blessed blinker cffi click cryptography dbus-python evdev flask-socketio flask h11 itsdangerous jinja2 markupsafe psutil pycairo pycparser pygobject pynput python-engineio python-socketio python-xlib simple-websocket six uvicorn wcwidth werkzeug wsproto poetry-core setuptools wheel pip
+Building source package for version 1.4.1...
+ dpkg-buildpackage -us -uc -ui -S -sa -d
+dpkg-buildpackage: info: source package nuxbt
+dpkg-buildpackage: info: source version 1.4.1-1
+dpkg-buildpackage: info: source distribution noble
+dpkg-buildpackage: info: source changed by NUXBT Releases <nuxbt@hannahis.gay>
+ dpkg-source --before-build .
+ debian/rules clean
+dh clean --with python-virtualenv
+   dh_clean
+ dpkg-source -b .
+dpkg-source: info: using source format '3.0 (quilt)'
+dpkg-source: info: building nuxbt using existing ./nuxbt_1.4.1.orig.tar.gz
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib64:
+dpkg-source: error:   new version is symlink to lib
+dpkg-source: error:   old version is nonexistent
+dpkg-source: error: cannot represent change to dist/nuxbt-1.4.1-py3-none-any.whl: binary file contents changed
+dpkg-source: error: add dist/nuxbt-1.4.1-py3-none-any.whl in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: file nuxbt/dist/nuxbt-1.4.1-py3-none-any.whl.publish.attestation has no final newline (either original or modified version)
+dpkg-source: error: cannot represent change to dist/nuxbt-1.4.1.tar.gz: binary file contents changed
+dpkg-source: error: add dist/nuxbt-1.4.1.tar.gz in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: file nuxbt/dist/nuxbt-1.4.1.tar.gz.publish.attestation has no final newline (either original or modified version)
+dpkg-source: error: cannot represent change to dist/nuxbt-1.4.1.x86_64.rpm: binary file contents changed
+dpkg-source: error: add dist/nuxbt-1.4.1.x86_64.rpm in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/nuxbt_1.4.1_amd64.deb: binary file contents changed
+dpkg-source: error: add dist/nuxbt_1.4.1_amd64.deb in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/Activate.ps1' will not be represented in diff
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/activate' will not be represented in diff
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/activate.csh' will not be represented in diff
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/activate.fish' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/flask' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/nuxbt' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/pip' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/pip3' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/pip3.12' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/bin/python: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/bin/python in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/python' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/bin/python3: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/bin/python3 in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/python3' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/bin/python3.12: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/bin/python3.12 in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0777 of 'dist/usr/lib/nuxbt/bin/python3.12' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/bin/uvicorn' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/Flask_SocketIO-5.5.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/Flask_SocketIO-5.5.1.dist-info/top_level.txt' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/_cffi_backend.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/_cffi_backend.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/_cffi_backend.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_bindings.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_bindings.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_bindings.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_glib_bindings.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_glib_bindings.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/_dbus_glib_bindings.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/a2wsgi-1.10.10.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/a2wsgi/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/bidict-0.23.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/blessed-1.25.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/blessed/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/blinker-1.9.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/blinker/py.typed' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/cairo/_cairo.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/cairo/_cairo.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cairo/_cairo.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cairo/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cffi-2.0.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/click-8.3.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/click/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cryptography-46.0.3.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/cryptography/hazmat/bindings/_rust.abi3.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/cryptography/hazmat/bindings/_rust.abi3.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cryptography/hazmat/bindings/_rust.abi3.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/cryptography/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/dbus_python-1.4.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/dbus_python-1.4.0.dist-info/WHEEL has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/engineio/async_drivers/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev-1.9.2.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_ecodes.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_ecodes.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_ecodes.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_input.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_input.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_input.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_uinput.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_uinput.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/_uinput.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/genecodes_py.py has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/evdev/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/flask-3.1.2.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/flask/py.typed' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi_cairo.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi_cairo.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/gi/_gi_cairo.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/h11-0.16.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/itsdangerous-2.2.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/itsdangerous/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/jinja2-3.1.6.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/jinja2/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/markupsafe-3.0.3.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/markupsafe/_speedups.cpython-312-x86_64-linux-gnu.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/markupsafe/_speedups.cpython-312-x86_64-linux-gnu.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/markupsafe/_speedups.cpython-312-x86_64-linux-gnu.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/markupsafe/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt-1.4.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt-1.4.1.dist-info/direct_url.json has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt-1.4.1.dist-info/licenses/LICENSE has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/__init__.py has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/controller/sdp/switch-controller.xml has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/cert.py has no final newline (either original or modified version)
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/favicon.png: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/favicon.png in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/joyconl.svg has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/joyconr.svg has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/js/socket.io.js has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/js/socket.io.js.map has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/procon-transparent.svg has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/static/procon.svg has no final newline (either original or modified version)
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/nuxbt/web/templates/index.html has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip-25.0.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/operations/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/operations/build/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/resolution/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/resolution/legacy/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/resolution/resolvelib/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_internal/utils/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/cachecontrol/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/certifi/py.typed' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t32.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t32.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t64-arm.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t64-arm.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t64.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/t64.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w32.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w32.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w64-arm.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w64-arm.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w64.exe: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distlib/w64.exe in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/distro/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/idna/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/packaging/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/platformdirs/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/resolvelib/compat/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/resolvelib/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/rich/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/truststore/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/urllib3/contrib/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/urllib3/contrib/_securetransport/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/urllib3/packages/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pip/_vendor/urllib3/packages/backports/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/psutil-7.1.3.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/psutil/_psutil_linux.abi3.so: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/psutil/_psutil_linux.abi3.so in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/psutil/_psutil_linux.abi3.so' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pycairo-1.29.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/pycairo-1.29.0.dist-info/WHEEL has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pycparser-2.23.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pygobject-3.54.5.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/pygobject-3.54.5.dist-info/WHEEL has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/pynput-1.8.1.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/pynput-1.8.1.dist-info/pbr.json has no final newline (either original or modified version)
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/python_engineio-4.12.3.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: executable mode 0755 of 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/python_engineio-4.12.3.dist-info/top_level.txt' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/python_socketio-5.15.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/python_xlib-0.33.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/simple_websocket-1.1.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/six-1.17.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn-0.38.0.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/lifespan/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/loops/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/middleware/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/protocols/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/protocols/http/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/uvicorn/protocols/websockets/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/wcwidth-0.2.14.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug-3.1.4.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/console.png: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/console.png in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/less.png: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/less.png in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: error: cannot represent change to dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/more.png: binary file contents changed
+dpkg-source: error: add dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/debug/shared/more.png in debian/source/include-binaries if you want to store the modified binary in the debian tarball
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/middleware/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/py.typed' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/werkzeug/sansio/__init__.py' will not be represented in diff
+dpkg-source: warning: newly created empty file 'dist/usr/lib/nuxbt/lib/python3.12/site-packages/wsproto-1.3.2.dist-info/REQUESTED' will not be represented in diff
+dpkg-source: warning: file nuxbt/dist/usr/lib/nuxbt/lib/python3.12/site-packages/wsproto-1.3.2.dist-info/licenses/LICENSE has no final newline (either original or modified version)
+dpkg-source: error: unrepresentable changes to source
+dpkg-buildpackage: error: dpkg-source -b . subprocess returned exit status 1
+debuild: fatal error at line 1184:
+dpkg-buildpackage -us -uc -ui -S -sa -d failed
