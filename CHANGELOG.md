@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.4.1 (2025-12-13)
+
+### Bug Fixes
+
+- **releases**: Fixed debsource workflow dependencies
+  ([#16](https://github.com/hannahbee91/nuxbt/pull/16),
+  [`c4af224`](https://github.com/hannahbee91/nuxbt/commit/c4af22400981b23d26e53d4c1d7b986abc244284))
+
+
 ## v1.4.0 (2025-12-13)
 
 ### Features
