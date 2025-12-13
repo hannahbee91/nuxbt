@@ -10,7 +10,9 @@ on:
       - 'poetry.lock'
       - 'MANIFEST.in'
       - 'nfpm.yaml'
-      - '.github/workflows/release.yml'
+      - '.github/workflows/*'
+      - 'debian/*'
+      - '!debian/changelog'
 
 jobs:
   bump-version:

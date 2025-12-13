@@ -57,7 +57,7 @@ def check_cli(name, cli_string, msg=None):
             print(msg)
         exit(1)
 
-INSTALL_SCRIPT = """pip3 install nuxbt"""
+INSTALL_SCRIPT = """sudo add-apt-repository ppa:hannahis/nuxbt && sudo apt update && sudo apt install nuxbt"""
 
 if __name__ == "__main__":
     print("Checking for the required utilities...")

@@ -1,4 +1,4 @@
-name: Publish Python Package
+name: Publish New Release
 
 on:
   release:
@@ -25,7 +25,9 @@ jobs:
           sudo apt-get install -y build-essential libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository1.0-dev pkg-config debhelper devscripts dh-virtualenv dput python3-poetry-core python3-cairo python3-evdev
 
       - name: Install Poetry
-        run: pip install poetry
+        run: |
+            pip install poetry
+            poetry self add poetry-plugin-export
 
       - name: Install project dependencies
         run: poetry install --sync --no-interaction
@@ -47,10 +49,15 @@ jobs:
           
           # Create venv in the temporary location
           python3 -m venv dist/usr/lib/nuxbt
+
+          # Export requirements to ensure we get locked versions
+          poetry export --without-hashes --format=requirements.txt > requirements.txt
           
           # Install the package and dependencies into the venv
           source dist/usr/lib/nuxbt/bin/activate
-          poetry build
+          # Install dependencies first from the locked requirements
+          pip install -r requirements.txt
+          # Then install the package itself
           pip install dist/*.whl
           
           # Fix shebangs to point to the target location /usr/lib/nuxbt
@@ -120,22 +127,9 @@ jobs:
              git commit -am "Update changelog for $VERSION [skip ci]"
           fi
 
-          # Vendor dependencies (for offline PPA build)
-          echo "Vendoring dependencies..."
-          mkdir -p debian/source
-          echo "3.0 (quilt)" > debian/source/format
-          mkdir -p wheels
-          pip download -r <(pip freeze) poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
-          # Remove packages that we want to use from system
-          rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
+           # Vendor dependencies and build source package using the script
+           # This ensures consistency with local builds and uses poetry export
+           ./scripts/build_ppa_source.sh
           
-          # Build source package
-          # Create orig tarball with vendored dependencies
-          tar --exclude='./debian' --exclude='./.git' --exclude='./dist' -czf "../nuxbt_$VERSION.orig.tar.gz" .
-          
-          # -S: source only
-          # -sa: include original source
-          debuild -S -sa -k"$GPG_KEY_ID"
-          
-          # Upload to PPA
-          dput my-ppa ../nuxbt_*_source.changes
+           # Upload to PPA
+           dput my-ppa ../nuxbt_*_source.changes
