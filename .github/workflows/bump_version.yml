@@ -12,8 +12,7 @@ on:
       - 'nfpm.yaml'
       - '.github/workflows/*'
       - 'debian/*'
-    paths-ignore:
-      - 'debian/changelog'
+      - '!debian/changelog'
 
 jobs:
   bump-version:
