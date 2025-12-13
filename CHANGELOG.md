@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v1.3.1 (2025-12-13)
+
+### Bug Fixes
+
+- **ppa**: Fixed ppa workflow ([#12](https://github.com/hannahbee91/nuxbt/pull/12),
+  [`4cb7223`](https://github.com/hannahbee91/nuxbt/commit/4cb7223a9e4cb201b73a5ba181a64e0f840ad2f7))
+
+
 ## v1.3.0 (2025-12-13)
 
 ### Features
