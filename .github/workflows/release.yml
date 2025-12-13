@@ -22,7 +22,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev pkg-config
+          sudo apt-get install -y libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev pkg-config debhelper devscripts dh-virtualenv dput
 
       - name: Install Poetry
         run: pip install poetry
@@ -84,3 +84,53 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} dist/nuxbt_*.deb dist/nuxbt-*.rpm
+
+      - name: Build and Upload to PPA
+        env:
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          DEBEMAIL: "nuxbt@hannahis.gay"
+          DEBFULLNAME: "NUXBT Releases"
+        run: |
+          export VERSION=${{ github.event.release.tag_name }}
+          export VERSION=${VERSION#v}
+          
+          # Configure dput (using a simple config for Launchpad)
+          echo "[my-ppa]" > ~/.dput.cf
+          echo "fqdn = ppa.launchpad.net" >> ~/.dput.cf
+          echo "method = ftp" >> ~/.dput.cf
+          echo "incoming = ~hannahbee-0602/ubuntu/nuxbt/" >> ~/.dput.cf
+          echo "login = anonymous" >> ~/.dput.cf
+          echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
+          
+          # Update changelog to match release version if needed
+          # Ensure we have a clean state for the changelog
+          # Update changelog to match release version if needed
+          # Ensure we have a clean state for the changelog
+          if ! grep -q "($VERSION-1)" debian/changelog; then
+             dch -v "$VERSION-1" --distribution noble "New release $VERSION"
+             
+             # Extract changes from CHANGELOG.md and append them
+             awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | while IFS= read -r line; do
+                dch -a "$line"
+             done
+
+             # Commit the changelog change so it's included in the source
+             git config --global user.email "bot@nuxbt.com"
+             git config --global user.name "Nuxbt Bot"
+             git commit -am "Update changelog for $VERSION [skip ci]"
+          fi
+
+          # Vendor dependencies (for offline PPA build)
+          echo "Vendoring dependencies..."
+          mkdir -p wheels
+          pip download -r <(pip freeze) poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
+          # Remove packages that we want to use from system
+          rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
+          
+          # Build source package
+          # -S: source only
+          # -sa: include original source
+          debuild -S -sa -k"$GPG_KEY_ID"
+          
+          # Upload to PPA
+          dput my-ppa ../nuxbt_*_source.changes

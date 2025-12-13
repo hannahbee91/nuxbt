@@ -48,6 +48,19 @@
 
 ### Linux (DEB/RPM - Recommended)
 
+## Ubuntu PPA
+
+1. Add the PPA to your system:
+```bash
+sudo add-apt-repository ppa:hannahbee-0602/nuxbt
+sudo apt update
+```
+
+2. Install NUXBT:
+```bash
+sudo apt install nuxbt
+```
+
 1. Go to the [Releases page](https://github.com/hannahbee91/nuxbt/releases/latest).
 2. Download the appropriate package for your system (`.deb` for Debian/Ubuntu, `.rpm` for Fedora/CentOS/openSUSE).
 3. Install the package:
@@ -371,9 +384,8 @@ This means that another service has already bound itself to the Control and Inte
 3. Transition the webapp to a more maintainable React build
 4. Allow for recording macros from direct input over the TUI
 5. Locally store created macros, allowing for naming and reusing across sessions
-6. Create PPA for Ubuntu
-7. ~~Create Flatpak~~ - Not possible due to needing root access to bluetooth modules
-8. Add support for Switch 2 controller emulation
+6. ~~Create Flatpak~~ - Not possible due to needing root access to bluetooth modules
+7. Add support for Switch 2 controller emulation
 
 ### Plans that Need More Testing
 
