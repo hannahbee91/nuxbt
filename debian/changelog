@@ -1,3 +1,9 @@
+nuxbt (1.3.1-1) UNRELEASED; urgency=medium
+
+  * New release 1.3.1
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Sat, 13 Dec 2025 08:26:20 -0800
+
 nuxbt (1.2.2-7) noble; urgency=medium
 
   * Patch maintainer scripts (postinst) to use correct install path (/usr/lib/nuxbt).

@@ -122,12 +122,17 @@ jobs:
 
           # Vendor dependencies (for offline PPA build)
           echo "Vendoring dependencies..."
+          mkdir -p debian/source
+          echo "3.0 (quilt)" > debian/source/format
           mkdir -p wheels
           pip download -r <(pip freeze) poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
           # Remove packages that we want to use from system
           rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
           
           # Build source package
+          # Create orig tarball with vendored dependencies
+          tar --exclude='./debian' --exclude='./.git' --exclude='./dist' -czf "../nuxbt_$VERSION.orig.tar.gz" .
+          
           # -S: source only
           # -sa: include original source
           debuild -S -sa -k"$GPG_KEY_ID"
