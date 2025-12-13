@@ -10,7 +10,10 @@ on:
       - 'poetry.lock'
       - 'MANIFEST.in'
       - 'nfpm.yaml'
-      - '.github/workflows/release.yml'
+      - '.github/workflows/*'
+      - 'debian/*'
+    paths-ignore:
+      - 'debian/changelog'
 
 jobs:
   bump-version:

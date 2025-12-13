@@ -19,7 +19,8 @@ echo "3.0 (quilt)" > debian/source/format
 # Vendor dependencies
 echo "Vendoring dependencies..."
 mkdir -p wheels
-pip download -r <(pip freeze) poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
+poetry export --without-hashes --format=requirements.txt > requirements.txt
+pip download -r requirements.txt poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
 # Remove packages that we want to use from system (avoid building from sdist)
 rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
 
