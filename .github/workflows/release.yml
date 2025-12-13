@@ -22,7 +22,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev pkg-config debhelper devscripts dh-virtualenv dput
+          sudo apt-get install -y build-essential libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository1.0-dev pkg-config debhelper devscripts dh-virtualenv dput python3-poetry-core python3-cairo python3-evdev
 
       - name: Install Poetry
         run: pip install poetry
