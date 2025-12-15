@@ -142,4 +142,15 @@ messages.txt
 Vagrantfile
 .vagrant
 cert.pem
-key.pem
+
+# Debian packaging
+debian/files
+debian/nuxbt/
+debian/*.log
+debian/*.substvars
+debian/*.debhelper
+debian/.debhelper/
+debian/nuxbt.debhelper.log
+debian/nuxbt.substvars
+.pybuild/
+dist_ppa/

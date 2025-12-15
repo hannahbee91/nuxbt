@@ -125,6 +125,7 @@ jobs:
              git config --global user.email "bot@nuxbt.com"
              git config --global user.name "Nuxbt Bot"
              git commit -am "Update changelog for $VERSION [skip ci]"
+             git push origin HEAD:main
           fi
 
            # Vendor dependencies and build source package using the script
