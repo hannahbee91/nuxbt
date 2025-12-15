@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v1.5.0 (2025-12-15)
+
+### Bug Fixes
+
+- **misc**: Fixed added debug file again [skip ci]
+  ([`677e9de`](https://github.com/hannahbee91/nuxbt/commit/677e9de9d0849c7bc4a7fd2c9d3ac99cabc0ba84))
+
+- **misc**: Got rid of inadvertently added file
+  ([`4ddc05b`](https://github.com/hannahbee91/nuxbt/commit/4ddc05b2d344da68885a30d2c95a848ebba1ce75))
+
+### Features
+
+- **webapp**: Allow Saving of Macros ([#19](https://github.com/hannahbee91/nuxbt/pull/19),
+  [`761cbb8`](https://github.com/hannahbee91/nuxbt/commit/761cbb83bbfd13ed7c62388be6875f880a39a821))
+
+Macros can now be saved and loaded for future use Macros are stored under `~/.config/nuxbt/macros`
+  You can write macros in any editor and save them to config directory and they will be loaded in at
+  next launch of the app Closes #18
+
+
 ## v1.4.1 (2025-12-13)
 
 ### Bug Fixes
