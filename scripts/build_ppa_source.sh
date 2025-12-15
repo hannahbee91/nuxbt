@@ -24,6 +24,12 @@ pip download -r requirements.txt poetry-core setuptools wheel pip --dest wheels/
 # Remove packages that we want to use from system (avoid building from sdist)
 rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
 
+# Remove these packages from requirements.txt so pip doesn't try to install them
+sed -i '/^PyGObject/d' requirements.txt
+sed -i '/^dbus-python/d' requirements.txt
+sed -i '/^pycairo/d' requirements.txt
+sed -i '/^evdev/d' requirements.txt
+
 # Get version from pyproject.toml
 VERSION=$(grep "^version =" pyproject.toml | cut -d '"' -f 2)
 
