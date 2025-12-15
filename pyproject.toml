@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nuxbt"
-version = "1.5.1"
+version = "1.5.3"
 description = "Control your Nintendo Switch through a website, terminal, or macro."
 authors = ["Hannah Brown <hannah@hannahis.gay>"]
 license = "MIT"

@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v1.5.3 (2025-12-15)
+
+### Bug Fixes
+
+- **release**: Ensure next version is 1.5.3 ([#22](https://github.com/hannahbee91/nuxbt/pull/22),
+  [`e4b925a`](https://github.com/hannahbee91/nuxbt/commit/e4b925aa46ab33367a668f518bdfdadba5f39d29))
+
+
 ## v1.5.1 (2025-12-15)
 
 ### Bug Fixes
