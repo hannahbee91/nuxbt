@@ -1,3 +1,15 @@
+nuxbt (1.5.5-1) noble; urgency=medium
+
+  * New release 1.5.5
+  * ### Bug Fixes
+  * **ci**: Fixed a duplicated line causing validation error
+  *   ([#24](https://github.com/hannahbee91/nuxbt/pull/24),
+  *
+    [`bd2435a`](https://github.com/hannahbee91/nuxbt/commit/bd2435a78712
+    0b05895ef0460c803a2da615155a))
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Mon, 15 Dec 2025 23:52:06 +0000
+
 nuxbt (1.5.2-1) noble; urgency=medium
 
   * New release 1.5.2 to fix source tarball mismatch
