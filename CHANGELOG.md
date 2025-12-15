@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.5.4 (2025-12-15)
+
+### Bug Fixes
+
+- **ci**: Use app token for release workflow to allow push to protected branch
+  ([#23](https://github.com/hannahbee91/nuxbt/pull/23),
+  [`924b71d`](https://github.com/hannahbee91/nuxbt/commit/924b71dd9d9904f51fadc8df0f2fcc9635721409))
+
+
 ## v1.5.3 (2025-12-15)
 
 ### Bug Fixes
