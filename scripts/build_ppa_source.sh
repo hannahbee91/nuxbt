@@ -25,7 +25,7 @@ pip download -r requirements.txt poetry-core setuptools wheel pip --dest wheels/
 rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
 
 # Remove these packages from requirements.txt so pip doesn't try to install them
-sed -i '/^PyGObject/d' requirements.txt
+sed -i '/^[Pp]y[Gg][Oo]bject/Id' requirements.txt
 sed -i '/^dbus-python/d' requirements.txt
 sed -i '/^pycairo/d' requirements.txt
 sed -i '/^evdev/d' requirements.txt

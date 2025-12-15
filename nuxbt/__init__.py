@@ -10,4 +10,4 @@ from .nuxbt import Sticks
 from .nuxbt import JOYCON_L
 from .nuxbt import JOYCON_R
 from .nuxbt import PRO_CONTROLLER
-__version__ = "1.5.0"
+__version__ = "1.5.2"
