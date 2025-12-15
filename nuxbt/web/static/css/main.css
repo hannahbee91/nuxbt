@@ -53,6 +53,7 @@ button {
     text-transform: uppercase;
     display: block;
     -webkit-appearance: none;
+    appearance: none;
     background-color: #d9dada;
     font-size: 0.9rem;
 }
@@ -633,4 +634,52 @@ Error Display Stying
     font-size: 1.1rem;
     display: inline;
     color: #d9dada;
+}
+
+.success {
+    border-radius: 5px;
+    background-color: #5fc54f;
+    padding: 1rem 1.5rem;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+    transition: 0.25s;
+}
+
+.success h1 {
+    padding: 0;
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1a1f28;
+    text-transform: uppercase;
+    font-weight: bold;
+    display: inline;
+    padding-right: 0.5rem;
+}
+
+.success p {
+    padding: 0;
+    margin: 0;
+    font-size: 1.1rem;
+    display: inline;
+    color: #1a1f28;
+}
+
+input[type="text"], select {
+    background-color: #d9dada;
+    color: #1a1f28;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 3px;
+    font-size: 1rem;
+}
+
+/* Ensure placeholder text is legible */
+input::placeholder {
+    color: #555;
+    opacity: 1;
+}
+
+option {
+    background-color: #d9dada;
+    color: #1a1f28;
 }

@@ -234,7 +234,141 @@ window.onload = function() {
     setInterval(updateLoader, 85);
     // // Print out the latency of setTimeout
     // measureTimeoutLatency.start(120, 60);
+    
+    // Load macros list
+    loadMacrosList();
 }
+
+function stopAllMacros() {
+    socket.emit('stop_all_macros');
+}
+
+/* Macro Management API */
+
+function loadMacrosList() {
+    fetch('/api/macros')
+        .then(response => response.json())
+        .then(macros => {
+            let select = document.getElementById("saved-macros-list");
+            // clear current options except default
+            select.innerHTML = '<option disabled selected>Select a macro...</option>';
+            
+            macros.forEach(macro => {
+                let option = document.createElement("option");
+                option.value = macro;
+                option.text = macro;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => console.error("Error loading macros:", err));
+}
+
+function displaySuccess(message) {
+    let errorContainer = document.createElement('div');
+    errorContainer.classList.add('success');
+    
+    let errorHeader = document.createElement('h1');
+    errorHeader.innerHTML = "SUCCESS";
+    
+    let errorMessage = document.createElement('p');
+    errorMessage.innerHTML = message;
+    
+    errorContainer.appendChild(errorHeader);
+    errorContainer.appendChild(errorMessage);
+    HTML_ERROR_DISPLAY.appendChild(errorContainer);
+
+    setTimeout(function() {
+        errorContainer.style.opacity = "0";
+        setTimeout(function() {
+            errorContainer.remove();
+        }, 1000);
+    }, 2000);
+}
+
+function saveMacro() {
+    let name = document.getElementById("macro-name").value;
+    let content = document.getElementById("macro-text").value;
+    
+    if (!name) {
+        displayError("Please enter a macro name");
+        return;
+    }
+    
+    if (!content) {
+        displayError("Macro content is empty");
+        return;
+    }
+    
+    fetch('/api/macros', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: name, macro: content }),
+    })
+    .then(response => {
+        if (response.ok) {
+            loadMacrosList();
+            displaySuccess("Macro saved!");
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .catch(err => displayError("Failed to save macro: " + err.message));
+}
+
+function loadMacro() {
+    let select = document.getElementById("saved-macros-list");
+    let name = select.value;
+    
+    if (!name || name === "Select a macro...") {
+        displayError("Please select a macro");
+        return;
+    }
+    
+    fetch('/api/macros/' + encodeURIComponent(name))
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Macro not found');
+        })
+        .then(data => {
+            document.getElementById("macro-text").value = data.macro;
+            document.getElementById("macro-name").value = name;
+            displaySuccess("Macro loaded!");
+        })
+        .catch(err => displayError("Error loading macro: " + err));
+}
+
+function deleteMacro() {
+    let select = document.getElementById("saved-macros-list");
+    let name = select.value;
+    
+    if (!name || name === "Select a macro...") {
+        displayError("Please select a macro");
+        return;
+    }
+    
+    if (!confirm("Are you sure you want to delete macro '" + name + "'?")) {
+        return;
+    }
+    
+    fetch('/api/macros/' + encodeURIComponent(name), {
+        method: 'DELETE',
+    })
+    .then(response => {
+        if (response.ok) {
+            loadMacrosList();
+            document.getElementById("macro-name").value = "";
+            displaySuccess("Macro deleted");
+        } else {
+            displayError("Failed to delete macro");
+        }
+    })
+    .catch(err => displayError("Error deleting macro: " + err));
+}
+
 
 // Keydown listener
 function globalKeydownHandler(evt) {

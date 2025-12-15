@@ -11,12 +11,100 @@ from flask_socketio import SocketIO, emit
 from a2wsgi import WSGIMiddleware
 import uvicorn
 import socketio
+import pathlib
+import pwd
 
 
 app = Flask(__name__,
             static_url_path='',
             static_folder='static',)
 nuxbt = Nxbt()
+
+
+def get_macro_dir():
+    """
+    Get the directory where macros are stored.
+    Tries to store in the real user's home if running as root via sudo.
+    """
+    try:
+        # If running as root via sudo, try to get the original user's home
+        sudo_user = os.environ.get('SUDO_USER')
+        if sudo_user:
+            home = pwd.getpwnam(sudo_user).pw_dir
+        else:
+            home = str(pathlib.Path.home())
+    except Exception:
+        # Fallback to current user's home
+        home = str(pathlib.Path.home())
+    
+    macro_dir = os.path.join(home, ".config", "nuxbt", "macros")
+    os.makedirs(macro_dir, exist_ok=True)
+    return macro_dir
+
+
+@app.route('/api/macros', methods=['GET'])
+def list_macros():
+    macro_dir = get_macro_dir()
+    macros = []
+    if os.path.exists(macro_dir):
+        for f in os.listdir(macro_dir):
+            if f.endswith(".txt"):
+                macros.append(f[:-4])  # Remove .txt extension
+    return json.dumps(macros)
+
+
+@app.route('/api/macros', methods=['POST'])
+def save_macro():
+    data = request.json
+    name = data.get("name")
+    content = data.get("macro")
+    
+    if not name or not content:
+        return "Missing name or content", 400
+    
+    # Sanitize name to prevent directory traversal
+    name = "".join(x for x in name if x.isalnum() or x in " -_")
+    
+    macro_dir = get_macro_dir()
+    file_path = os.path.join(macro_dir, f"{name}.txt")
+    
+    with open(file_path, "w") as f:
+        f.write(content)
+        
+    return "Saved", 200
+
+
+@app.route('/api/macros/<name>', methods=['GET'])
+def get_macro(name):
+    # Sanitize name
+    name = "".join(x for x in name if x.isalnum() or x in " -_")
+    
+    macro_dir = get_macro_dir()
+    file_path = os.path.join(macro_dir, f"{name}.txt")
+    
+    if not os.path.exists(file_path):
+        return "Macro not found", 404
+        
+    with open(file_path, "r") as f:
+        content = f.read()
+        
+    return json.dumps({"macro": content})
+
+
+@app.route('/api/macros/<name>', methods=['DELETE'])
+def delete_macro(name):
+    # Sanitize name
+    name = "".join(x for x in name if x.isalnum() or x in " -_")
+    
+    macro_dir = get_macro_dir()
+    file_path = os.path.join(macro_dir, f"{name}.txt")
+    
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return "Deleted", 200
+    else:
+        return "Macro not found", 404
+
 
 # Configuring/retrieving secret key
 secrets_path = os.path.join(

@@ -220,6 +220,21 @@
                     </div>
                     
                     <button onclick="stopAllMacros()" style="margin-top: 10px; background-color: #aa4444;">Stop All Macros</button>
+
+                    <h2 class="surface-lighter">Saved Macros</h2>
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="macro-name" placeholder="Macro Name" style="flex-grow: 1;" onfocus="disableKeyHandlers()" onblur="enableKeyHandlers()">
+                            <button onclick="saveMacro()">Save</button>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="saved-macros-list" style="flex-grow: 1;">
+                                <option disabled selected>Select a macro...</option>
+                            </select>
+                            <button onclick="loadMacro()">Load</button>
+                            <button onclick="deleteMacro()" style="background-color: #aa4444;">Delete</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
