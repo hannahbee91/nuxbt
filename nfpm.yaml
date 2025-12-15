@@ -27,6 +27,7 @@ overrides:
     - libgirepository-2.0-0
     - python3.12
     - python3.12-venv
+    - bluez
   rpm:
     depends:
     - dbus-libs
@@ -34,6 +35,7 @@ overrides:
     - gobject-introspection
     - glib2
     - python3.12
+    - bluez
 deb:
   scripts:
   triggers:

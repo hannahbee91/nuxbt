@@ -109,7 +109,35 @@ def toggle_clean_bluez(toggle):
     :raises Exception: If sdptool, hciconfig, or hcitool are not available.
     """
 
-    service_path = "/lib/systemd/system/bluetooth.service"
+    # Try to find the bluetooth service file
+    service_path = None
+    try:
+        # Check systemd for the service path
+        result = _run_command(["systemctl", "show", "-p", "FragmentPath", "bluetooth.service"])
+        output = result.stdout.decode("utf-8").strip()
+        if output.startswith("FragmentPath="):
+            path = output.split("=", 1)[1]
+            if path and os.path.exists(path):
+                service_path = path
+    except Exception:
+        pass
+
+    if service_path is None:
+        # Fallback to common locations
+        candidates = [
+            "/lib/systemd/system/bluetooth.service",
+            "/usr/lib/systemd/system/bluetooth.service",
+            "/etc/systemd/system/bluetooth.service"
+        ]
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                service_path = candidate
+                break
+    
+    if service_path is None:
+        # Default to the old hardcoded path if all else fails, 
+        # allowing the original FileNotFoundError to be raised if it's missing
+        service_path = "/lib/systemd/system/bluetooth.service"
     override_dir = Path("/run/systemd/system/bluetooth.service.d")
     override_path = override_dir / "nuxbt.conf"
 
