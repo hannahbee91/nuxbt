@@ -69,7 +69,7 @@ def test_macro_recording(page, web_server, mock_backend):
     page.goto(web_server)
     
     # Check if we are on the page
-    assert page.title() == "NUXBT Webapp"
+    assert page.title() == "NUXBT WebUI"
     
     # Click Pro Controller to start
     # The UI shows "Pro Controller" image.
