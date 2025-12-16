@@ -29,9 +29,24 @@ def mock_backend():
             0: {
                 "state": "connected",
                 "finished_macros": [],
-                "errors": []
+                "errors": [],
+                "direct_input": {
+                    "L_STICK": {"PRESSED": False, "X_VALUE": 0, "Y_VALUE": 0},
+                    "R_STICK": {"PRESSED": False, "X_VALUE": 0, "Y_VALUE": 0},
+                    "DPAD_UP": False, "DPAD_LEFT": False, "DPAD_RIGHT": False, "DPAD_DOWN": False,
+                    "L": False, "ZL": False, "R": False, "ZR": False,
+                    "JCL_SR": False, "JCL_SL": False, "JCR_SR": False, "JCR_SL": False,
+                    "PLUS": False, "MINUS": False, "HOME": False, "CAPTURE": False,
+                    "Y": False, "X": False, "B": False, "A": False
+                }
             }
         }
+        
+        def update_input(index, packet):
+            if index in mock_nuxbt.state:
+                mock_nuxbt.state[index]['direct_input'] = packet
+        
+        mock_nuxbt.set_controller_input.side_effect = update_input
         
         yield mock_nuxbt
 
@@ -53,7 +68,14 @@ def web_server(mock_backend):
     # Redirect stderr/stdout to avoid cluttering test output if desired, or keep it.
     # uvicorn.run blocks, so we run it in a thread.
     
-    server_thread = threading.Thread(target=lambda: uvicorn.run(app.app_asgi, host="127.0.0.1", port=port, log_level="critical", ws='wsproto'))
+    def run_server():
+        try:
+            uvicorn.run(app.app_asgi, host="127.0.0.1", port=port, log_level="critical", ws='wsproto')
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            
+    server_thread = threading.Thread(target=run_server)
     server_thread.daemon = True
     server_thread.start()
     
@@ -71,64 +93,36 @@ def test_macro_recording(page, web_server, mock_backend):
     # Check if we are on the page
     assert page.title() == "NUXBT WebUI"
     
-    # Click Pro Controller to start
-    # The UI shows "Pro Controller" image.
-    # Looking at index.html (implied by main.js finding #controller-selection)
-    # createProController() is called.
+    # Click "Create Pro Controller" button
+    # The new UI has a button with text "Create Pro Controller"
+    page.click("text=Create Pro Controller")
     
-    # We need to simulate the click. 
-    # Since I don't have the HTML content, I assume there's an element triggering createProController
-    # main.js: HTML_CONTROLLER_SELECTION = document.getElementById("controller-selection");
+    # Wait for the controller to show as connected
+    # In App.tsx, hitting "connected" state shows "Pro Controller {index + 1}"
+    # and the status badge connected.
+    # We can wait for the header "Pro Controller 1"
+    page.wait_for_selector("text=Pro Controller 1")
     
-    # Let's inspect the page content first or make a best guess.
-    # Assuming there's an img with onclick or a div.
-    # I'll rely on text "Pro Controller" or id logic.
+    # Switch to Macros Tab
+    # App.tsx: <button>Macros</button>
+    page.click("button:has-text('Macros')")
     
-    # Click on the element that calls createProController. 
-    # Based on main.js: "To create and start a Pro Controller, click the Pro controller graphic."
-    # The graphic likely has an alt or is inside a clickable div.
-    
-    # Let's wait for selector.
-    # Better: page.click("text=Pro Controller") might work if alt text is there.
-    # Or by ID if I knew it. main.js refers to "joystick-selection" maybe?
-    # Let's assume there is something clickable. I will verify HTML if this fails.
-    
-    # Wait: README says "click the Pro controller graphic".
-    # I'll try to click `img[alt="Pro Controller"]` or similar if I can guessed it,
-    # OR just evaluate js:
-    page.evaluate("createProController()")
-    
-    # Wait for loader
-    # main.js: HTML_LOADER.classList.remove('hidden')
-    page.wait_for_selector("#loader:not(.hidden)")
-    
-    # The backend (mock) should emit create_pro_controller
-    # The frontend waits for that event, then polls checkForLoad
-    # checkForLoad checks STATE.
-    # Our mock backend state has "connected".
-    
-    # Wait for connected UI
-    # HTML_CONTROLLER_CONFIG.classList.remove('hidden')
-    page.wait_for_selector("#controller-config:not(.hidden)", timeout=5000)
+    # Wait for MacroControls to be visible (e.g. "Macro Editor" header)
+    page.wait_for_selector("text=Macro Editor")
     
     # Test Recording
-    # Click "Record Input" button.
-    # main.js: toggleRecording()
-    # Button id="record-macro-btn"
-    page.click("#record-macro-btn")
+    # Click "Record" button.
+    # MacroControls.tsx: button with text "Record"
+    page.click("button:has-text('Record')")
     
-    # Status should show
-    # id="recording-status" not hidden
-    assert page.is_visible("#recording-status")
+    # Status should show REC indicator
+    # MacroControls.tsx: span with text "REC"
+    page.wait_for_selector("text=REC")
     
     # Simulate button press
-    # Using keyboard k: 'A' button -> keyCode 76 (from KEYMAP)
-    page.keyboard.down('L')  # 'L' key is mapped to 'A' button in main.js (76: "A")?
-    # Wait, KEYMAP: 76: "A" -> this is 'L' key code? 'L' char code is 76.
-    # Let's check: 'l'.charCodeAt(0) might be 108. 'L' is 76?
-    # 'L' keycode is 76.
-    
-    # Press 'L' (A Button)
+    # Using keyboard 'L' -> 'A' button as per previous understanding 
+    # (assuming mapping is preserved or standard keyboard mapping is used)
+    # ControllerVisual.tsx: keys.has('L') -> packet.A = true
     page.keyboard.down('L')
     time.sleep(0.1)
     page.keyboard.up('L')
@@ -137,11 +131,12 @@ def test_macro_recording(page, web_server, mock_backend):
     time.sleep(0.5)
     
     # Stop Recording
-    page.click("#record-macro-btn")
+    # Button text changes to "Stop Rec"
+    page.click("button:has-text('Stop Rec')")
     
     # Check Macro Text Area
-    # id="macro-text"
-    macro_text = page.input_value("#macro-text")
+    # textarea in MacroControls
+    macro_text = page.input_value("textarea")
     
     # Verify content
     # Should contain "A" and timings
@@ -149,10 +144,8 @@ def test_macro_recording(page, web_server, mock_backend):
     assert "s" in macro_text
     
     # Test Playback
-    # Click "Run Macro" button (implied exits) or sendMacro()
-    # Need to find the button.
-    # Assuming there's a button calling sendMacro()
-    page.evaluate("sendMacro()")
+    # Click "Run" button
+    page.click("button:has-text('Run')")
     
     # Backend mock.macro should be called
     # Wait a bit for socket emission
