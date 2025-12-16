@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v2.0.0 (2025-12-16)
+
+### Features
+
+- **webapp**: Revamp the WebApp ([#26](https://github.com/hannahbee91/nuxbt/pull/26),
+  [`72c30f1`](https://github.com/hannahbee91/nuxbt/commit/72c30f140de0d26eb0d36d4c33ecde8957dd93ba))
+
+* feat(webapp)!: Revamp the WebApp
+
+Uses React and Tailwind for a more modern appearance. Allows for looping a certain number of times,
+  or until stopped Supports light and dark mode Hotkey ('r') for starting/stopping macro recording
+  Passes along gamepad input (needs more testing) Offers users to report detected bugs directly to
+  GitHub
+
+* fix(ci): Fixed node version in ci
+
+Never trust VSCode autocomplete
+
+* fix(ci): Ensure templates directory exists in build environment
+
+* fix(tests): Forgot to update new app page title
+
+* fix(ci): Verified all PyTests actually pass locally
+
+
 ## v1.5.5 (2025-12-15)
 
 ### Bug Fixes
