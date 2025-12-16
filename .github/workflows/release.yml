@@ -41,6 +41,19 @@ jobs:
       - name: Install project dependencies
         run: poetry install --sync --no-interaction
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: './nuxbt/web/client/package-lock.json'
+
+      - name: Build Frontend
+        working-directory: ./nuxbt/web/client
+        run: |
+          npm ci
+          npm run build
+
       - name: Build package
         run: poetry build
 

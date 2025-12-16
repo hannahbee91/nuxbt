@@ -61,6 +61,8 @@ sudo apt update
 sudo apt install nuxbt
 ```
 
+### GitHub Releases Installation
+
 1. Go to the [Releases page](https://github.com/hannahbee91/nuxbt/releases/latest).
 2. Download the appropriate package for your system (`.deb` for Debian/Ubuntu, `.rpm` for Fedora/CentOS/openSUSE).
 3. Install the package:
@@ -88,7 +90,11 @@ This will properly install dependencies and available update the `nuxbt` command
 pip --user install nuxbt
 ```
 
-This will install NUXBT into your current Python environment, for your user only. You can then add an nuxbt alias to your .bashrc or .zshrc file to run NUXBT from the virtual environment.
+This will install NUXBT into your current Python environment, for your user only.
+
+### Post-installation
+
+You can add a nuxbt alias to your .bashrc or .zshrc file to run NUXBT from however you installed it, to prevent having to use sudo every time.
 
 ```bash
 alias nuxbt="sudo -E $(which nuxbt)"
@@ -99,6 +105,44 @@ alias nuxbt="sudo -E $(which nuxbt)"
 ### Windows and macOS
 
 See the installation guide [here.](docs/Windows-and-macOS-Installation.md)
+
+## Development and Contributing
+
+NUXBT uses a Python backend and a React (TypeScript + Vite) frontend.
+
+### Prerequisites
+*   Python 3.12 or higher
+*   [Poetry](https://python-poetry.org/docs/#installation) for dependency management
+*   Node.js 24 and npm (for the frontend)
+*   BlueZ development headers (Linux only, see Installation section)
+
+### 1. Setting up the Backend
+
+```bash
+# Install dependencies with Poetry
+poetry install
+```
+
+### 2. Building the Frontend
+The frontend code resides in `nuxbt/web/client`. You must build it before running the webapp, as Flask serves the compiled assets.
+
+```bash
+cd nuxbt/web/client
+npm install
+npm run build
+```
+
+This will compile the React app and place the assets into `nuxbt/web/static`, where the Python backend expects them.
+
+### 3. Running Locally
+Once built, you can run the webapp using Poetry. Note that `sudo` is often required for Bluetooth access on Linux.
+
+```bash
+# Run the webapp pointing to the poetry environment
+sudo -E $(poetry which nuxbt) webapp
+```
+
+*Note: The `-E` flag preserves your environment variables, allowing sudo to see your virtual environment configuration, and `$(poetry which nuxbt)` ensures we use the executable from the poetry VEnv.*
 
 ## Getting Started
 

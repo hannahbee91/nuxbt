@@ -16,7 +16,6 @@ import pwd
 
 
 app = Flask(__name__,
-            static_url_path='',
             static_folder='static',)
 nuxbt = Nxbt()
 
@@ -124,7 +123,7 @@ app.config['SECRET_KEY'] = secret_key
 # Ensure async_mode is threading for uvicorn/standard WSGI compatibility without eventlet
 # Note: This limits SocketIO to long-polling when running under uvicorn + a2wsgi/WSGIMiddleware
 # unless a2wsgi handles websocket translation (which it does for uWSGI but maybe not generic).
-sio = SocketIO(app, cookie=False, async_mode='threading')
+sio = SocketIO(app, cookie=False, async_mode='threading', cors_allowed_origins='*')
 
 # Wrap Flask app with WSGIMiddleware to allow running with uvicorn (ASGI)
 # This middleware bridges ASGI -> WSGI

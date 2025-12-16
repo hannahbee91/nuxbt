@@ -28,6 +28,7 @@ overrides:
     - python3.12
     - python3.12-venv
     - bluez
+    - python3-evdev
   rpm:
     depends:
     - dbus-libs
@@ -36,6 +37,7 @@ overrides:
     - glib2
     - python3.12
     - bluez
+    - python3-evdev
 deb:
   scripts:
   triggers:

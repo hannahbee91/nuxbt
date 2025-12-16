@@ -3,6 +3,8 @@ include nuxbt/controller/*.py
 include nuxbt/controller/sdp/*.xml
 include nuxbt/web/*.py
 include nuxbt/web/templates/*.html
+recursive-include nuxbt/web/static/dist *
+recursive-include nuxbt/web/static/assets *
 include nuxbt/web/static/js/*.js
 include nuxbt/web/static/css/*.css
 include nuxbt/web/static/*.svg

@@ -12,6 +12,10 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+include = [
+    { path = "nuxbt/web/static/dist/**/*", format = ["sdist", "wheel"] },
+    { path = "nuxbt/web/templates/index.html", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.urls]
 "Code" = "https://github.com/hannahbee91/nuxbt"

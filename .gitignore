@@ -154,3 +154,9 @@ debian/nuxbt.debhelper.log
 debian/nuxbt.substvars
 .pybuild/
 dist_ppa/
+
+# Frontend
+nuxbt/web/client/node_modules/
+nuxbt/web/static/dist/
+nuxbt/web/static/assets/
+nuxbt/web/templates/index.html
