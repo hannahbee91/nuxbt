@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest",
-    "build": "tsc -b && vite build && mv ../static/dist/index.html ../templates/index.html && rm -rf ../static/assets && cp -r ../static/dist/assets ../static/",
+    "build": "tsc -b && vite build && mkdir -p ../templates && mv ../static/dist/index.html ../templates/index.html && rm -rf ../static/assets && cp -r ../static/dist/assets ../static/",
     "lint": "eslint .",
     "preview": "vite preview"
   },
