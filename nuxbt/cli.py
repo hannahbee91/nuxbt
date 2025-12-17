@@ -1,11 +1,13 @@
 import click
 import os
 import traceback
+import sys
+import subprocess
 from time import sleep, time
 from random import randint
 
-from .nuxbt import Nxbt, PRO_CONTROLLER
-from .bluez import find_devices_by_alias
+from .nuxbt import Nuxbt, PRO_CONTROLLER
+from .bluez import find_devices_by_alias, is_nuxbt_plugin_enabled, get_toggle_commands
 from .tui import InputTUI
 from . import __version__
 
@@ -103,6 +105,14 @@ def get_reconnect_target(reconnect, address):
     return reconnect_target
 
 
+def ensure_plugin_enabled():
+    """Checks if the NUXBT plugin is enabled. If not, exits with an error."""
+    if not is_nuxbt_plugin_enabled():
+        print("Error: NUXBT BlueZ plugin is not enabled.")
+        print("Please run 'nuxbt toggle' to enable the plugin.")
+        sys.exit(1)
+
+
 @click.group()
 @click.option('-l', 'enable_logging', is_flag=True, default=False,
               help="Enables logging to a file in the current working directory instead of stderr.")
@@ -127,6 +137,51 @@ def main(ctx, enable_logging, logfile, debug):
 
 
 @main.command()
+@pass_context
+def check(ctx):
+    """Checks if the NUXBT BlueZ plugin override is enabled."""
+    if is_nuxbt_plugin_enabled():
+        print("NUXBT Plugin Enabled")
+    else:
+        print("NUXBT Plugin Disabled")
+
+
+@main.command()
+@pass_context
+def toggle(ctx):
+    """Toggles the NUXBT BlueZ plugin override."""
+    
+    enabled = is_nuxbt_plugin_enabled()
+    action = "Disable" if enabled else "Enable"
+    
+    print(f"You are about to {action.upper()} the NUXBT BlueZ plugin.")
+    print("This will require running the following commands with sudo:")
+    print("")
+    
+    commands = get_toggle_commands(not enabled)
+    for cmd in commands:
+        print(f"  sudo {cmd}")
+    
+    print("")
+    if click.confirm(f"Do you want to proceed to {action.lower()} the plugin?"):
+        print(f"{action}d plugin...")
+        for cmd in commands:
+             # Using os.system or subprocess to run with sudo
+             # If we just run it, it might prompt for password multiple times.
+             # Better to run 'sudo sh -c "cmd"' or just let the user see what happens.
+             # Since interactively, sudo will prompt if needed.
+             subprocess.run(["sudo", "sh", "-c", cmd], check=True)
+        
+        print("Done.")
+        # Verify
+        if is_nuxbt_plugin_enabled() != enabled:
+            # Should have flipped
+            pass
+        else:
+             print("Warning: State did not seem to change. Check if previous commands succeeded.")
+
+
+@main.command()
 @click.option('-i', '--ip', default="0.0.0.0", type=str,
               help="Specifies the IP to run the webapp at. Defaults to 0.0.0.0")
 @click.option('-p', '--port', default=8000, type=int,
@@ -140,6 +195,7 @@ def main(ctx, enable_logging, logfile, debug):
 @pass_context
 def webapp(ctx, ip, port, usessl, certpath):
     """Runs web server and allows for controller/macro input from a web browser."""
+    ensure_plugin_enabled()
     # We need to set up logging here if we want it for the webapp process
     # But usually webapp might have its own or share logic.
     # The existing code imported and ran start_web_app.
@@ -148,14 +204,15 @@ def webapp(ctx, ip, port, usessl, certpath):
     # or pass it if it accepts arguments. Checking app.py would be good if we can,
     # but based on previous cli, it didn't pass logging to start_web_app directly
     # except maybe via global config? No, it just called start_web_app.
-    start_web_app(ip=ip, port=port, usessl=usessl, cert_path=certpath)
+    start_web_app(ip=ip, port=port, usessl=usessl, cert_path=certpath, debug=ctx.debug)
 
 
 @main.command()
 @pass_context
 def demo(ctx):
     """Runs a demo macro (please ensure that your Switch is on the main menu's Change Grip/Order menu before running)."""
-    nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
+    ensure_plugin_enabled()
+    nx = Nuxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     adapters = nx.get_available_adapters()
     if len(adapters) < 1:
         raise OSError("Unable to detect any Bluetooth adapters.")
@@ -193,6 +250,7 @@ def demo(ctx):
 @pass_context
 def macro(ctx, commands, reconnect, address):
     """Allows for input of a specified macro from the command line (with the argument -c) or from a file."""
+    ensure_plugin_enabled()
     
     macro_content = None
     if commands:
@@ -209,7 +267,7 @@ def macro(ctx, commands, reconnect, address):
 
     reconnect_target = get_reconnect_target(reconnect, address)
 
-    nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
+    nx = Nuxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     print("Creating controller...")
     index = nx.create_controller(
         PRO_CONTROLLER,
@@ -241,6 +299,7 @@ def macro(ctx, commands, reconnect, address):
 @pass_context
 def tui(ctx, reconnect, address):
     """Opens a TUI that allows for direct input from the keyboard to the Switch."""
+    ensure_plugin_enabled()
     reconnect_target = get_reconnect_target(reconnect, address)
     tui_instance = InputTUI(reconnect_target=reconnect_target)
     tui_instance.start()
@@ -254,6 +313,7 @@ def tui(ctx, reconnect, address):
 @pass_context
 def remote_tui(ctx, reconnect, address):
     """Opens a TUI that allows for direct input from the keyboard to the Switch (Remote Mode)."""
+    ensure_plugin_enabled()
     reconnect_target = get_reconnect_target(reconnect, address)
     tui_instance = InputTUI(reconnect_target=reconnect_target, force_remote=True)
     tui_instance.start()
@@ -283,11 +343,12 @@ def addresses(ctx):
 @pass_context
 def test(ctx, timeout):
     """Runs through a series of tests to ensure NUXBT is working and compatible with your system."""
+    ensure_plugin_enabled()
     # Init
     print("[1] Attempting to initialize NUXBT...")
     nx = None
     try:
-        nx = Nxbt(debug=ctx.debug, log_file_path=ctx.logfile)
+        nx = Nuxbt(debug=ctx.debug, log_file_path=ctx.logfile)
     except Exception as e:
         print("Failed to initialize:")
         print(traceback.format_exc())
@@ -356,6 +417,20 @@ def test(ctx, timeout):
     print("Controller successfully exited the menu.\n")
 
     print("All tests passed.")
+
+
+@main.command()
+@pass_context
+def gui(ctx):
+    """Launches the NUXBT GUI."""
+    try:
+        from .gui import start_gui
+        start_gui()
+    except ImportError as e:
+        print("Failed to import GUI components. Please ensure PyQt6 is installed.")
+        print(f"Error: {e}")
+        sys.exit(1)
+
 
 
 if __name__ == '__main__':

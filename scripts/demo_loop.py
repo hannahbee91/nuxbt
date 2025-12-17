@@ -1,7 +1,7 @@
 from random import randint
 from time import sleep
 
-from nuxbt import Nxbt, PRO_CONTROLLER
+from nuxbt import Nuxbt, PRO_CONTROLLER
 
 
 MACRO = """
@@ -75,7 +75,7 @@ def demo():
     is used to run a macro.
     """
 
-    nx = Nxbt(debug=False)
+    nx = Nuxbt(debug=False)
     adapters = nx.get_available_adapters()
     if len(adapters) < 1:
         raise OSError("Unable to detect any Bluetooth adapters.")

@@ -18,6 +18,10 @@ contents:
   - src: /usr/lib/nuxbt/bin/nuxbt
     dst: /usr/bin/nuxbt
     type: symlink
+  - src: debian/nuxbt.desktop
+    dst: /usr/share/applications/nuxbt.desktop
+  - src: docs/img/nuxbt-logo.png
+    dst: /usr/share/icons/hicolor/512x512/apps/nuxbt.png
 overrides:
   deb:
     depends:
@@ -29,6 +33,8 @@ overrides:
     - python3.12-venv
     - bluez
     - python3-evdev
+    - python3-pyqt6
+    - libxcb-cursor0
   rpm:
     depends:
     - dbus-libs
@@ -38,6 +44,7 @@ overrides:
     - python3.12
     - bluez
     - python3-evdev
+    - python3-pyqt6
 deb:
   scripts:
   triggers:

@@ -38,6 +38,7 @@ uvicorn = "^0.38.0"
 a2wsgi = "^1.10.10"
 click = "^8.3.1"
 PyGObject = "^3.42.0"
+pyqt6 = "^6.10.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 pytest-playwright = "^0.4.0"

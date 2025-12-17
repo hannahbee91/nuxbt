@@ -127,14 +127,14 @@ class TestControllerTUI(unittest.TestCase):
         self.assertEqual(self.controller.CONTROLS["A"], self.controller.DEFAULT_CONTROLS["A"])
 
 class TestInputTUI(unittest.TestCase):
-    @patch('nuxbt.tui.Nxbt')
-    def setUp(self, MockNxbt):
+    @patch('nuxbt.tui.Nuxbt')
+    def setUp(self, MockNuxbt):
         # Mock pynput to prevent SystemExit on import failure in CI/headless envs
         self.pynput_patcher = patch.dict('sys.modules', {'pynput': MagicMock(), 'pynput.keyboard': MagicMock()})
         self.pynput_patcher.start()
 
-        self.mock_nxbt = MockNxbt.return_value
-        self.mock_nxbt.create_controller.return_value = 0
+        self.mock_nuxbt = MockNuxbt.return_value
+        self.mock_nuxbt.create_controller.return_value = 0
         
         # Patch detect_remote_connection to avoid system calls during init
         self.patcher = patch('nuxbt.tui.InputTUI.detect_remote_connection', return_value=False)
@@ -176,26 +176,26 @@ class TestInputTUI(unittest.TestCase):
     def test_check_for_disconnect(self):
         mock_term = MagicMock()
         # Manually set attributes typically set in mainloop
-        self.input_tui.nx = self.mock_nxbt
+        self.input_tui.nx = self.mock_nuxbt
         self.input_tui.controller_index = 0
         
-        self.mock_nxbt.state = {0: {"state": "connected"}}
+        self.mock_nuxbt.state = {0: {"state": "connected"}}
         
         # Should return normally if connected
         self.input_tui.check_for_disconnect(mock_term)
         
         # If crashed, should raise ConnectionError (but it prints errors first)
-        self.mock_nxbt.state = {0: {"state": "crashed", "errors": "Some error"}}
+        self.mock_nuxbt.state = {0: {"state": "crashed", "errors": "Some error"}}
         # It also sleeps and clears, mock those
         with patch('time.sleep'), patch.object(mock_term, 'clear', return_value=""), patch('builtins.print'):
              with self.assertRaises(ConnectionError):
                   self.input_tui.check_for_disconnect(mock_term)
 
 class TestRemoteDetection(unittest.TestCase):
-    @patch('nuxbt.tui.Nxbt')
+    @patch('nuxbt.tui.Nuxbt')
     @patch('psutil.Process')
     @patch('os.getppid')
-    def test_detect_remote_connection(self, mock_getppid, mock_process_cls, mock_nxbt):
+    def test_detect_remote_connection(self, mock_getppid, mock_process_cls, mock_nuxbt):
         # Setup mocks
         mock_getppid.return_value = 100
         

@@ -5,7 +5,7 @@ import time
 from socket import gethostname
 
 from .cert import generate_cert
-from ..nuxbt import Nxbt, PRO_CONTROLLER
+from ..nuxbt import Nuxbt, PRO_CONTROLLER
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from a2wsgi import WSGIMiddleware
@@ -17,12 +17,12 @@ import pwd
 
 app = Flask(__name__,
             static_folder='static',)
-nuxbt = Nxbt()
+nuxbt = None
 
 
-def get_macro_dir():
+def get_config_dir():
     """
-    Get the directory where macros are stored.
+    Get the directory where nuxbt configuration is stored.
     Tries to store in the real user's home if running as root via sudo.
     """
     try:
@@ -36,7 +36,17 @@ def get_macro_dir():
         # Fallback to current user's home
         home = str(pathlib.Path.home())
     
-    macro_dir = os.path.join(home, ".config", "nuxbt", "macros")
+    config_dir = os.path.join(home, ".config", "nuxbt")
+    os.makedirs(config_dir, exist_ok=True)
+    return config_dir
+
+
+def get_macro_dir():
+    """
+    Get the directory where macros are stored.
+    """
+    config_dir = get_config_dir()
+    macro_dir = os.path.join(config_dir, "macros")
     os.makedirs(macro_dir, exist_ok=True)
     return macro_dir
 
@@ -106,9 +116,9 @@ def delete_macro(name):
 
 
 # Configuring/retrieving secret key
-secrets_path = os.path.join(
-    os.path.dirname(__file__), "secrets.txt"
-)
+config_dir = get_config_dir()
+secrets_path = os.path.join(config_dir, "secrets.txt")
+
 if not os.path.isfile(secrets_path):
     secret_key = os.urandom(24).hex()
     with open(secrets_path, "w") as f:
@@ -207,20 +217,22 @@ def handle_macro(message):
 
 @sio.on('stop_all_macros')
 def handle_stop_all_macros():
-    nuxbt.clear_all_macros()
+    if nuxbt:
+        nuxbt.clear_all_macros()
 
 
 
-def start_web_app(ip='0.0.0.0', port=8000, usessl=False, cert_path=None):
+def start_web_app(ip='0.0.0.0', port=8000, usessl=False, cert_path=None, debug=False):
+    global nuxbt
+    if nuxbt is None:
+        nuxbt = Nuxbt(debug=debug)
+
     if usessl:
         if cert_path is None:
-            # Store certs in the package directory
-            cert_path = os.path.join(
-                os.path.dirname(__file__), "cert.pem"
-            )
-            key_path = os.path.join(
-                os.path.dirname(__file__), "key.pem"
-            )
+            # Store certs in the user's config directory
+            config_dir = get_config_dir()
+            cert_path = os.path.join(config_dir, "cert.pem")
+            key_path = os.path.join(config_dir, "key.pem")
         else:
             # If specified, store certs at the user's preferred location
             cert_path = os.path.join(

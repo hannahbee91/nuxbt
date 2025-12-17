@@ -10,7 +10,7 @@ Rules-Requires-Root: no
 Package: nuxbt
 Architecture: any
 Pre-Depends: dpkg (>= 1.16.1), python3, ${misc:Pre-Depends}
-Depends: ${misc:Depends}, ${shlibs:Depends}, python3-gi, python3-dbus, python3-cairo, python3-evdev, bluez
+Depends: ${misc:Depends}, ${shlibs:Depends}, python3-gi, python3-dbus, python3-cairo, python3-evdev, bluez, python3-pyqt6, libxcb-cursor0
 Description: Control your Nintendo Switch through a website, terminal, or macro.
  nuxbt allows you to control your Nintendo Switch over Bluetooth using
  a web interface, terminal commands, or macros.
