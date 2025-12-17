@@ -1,3 +1,17 @@
+nuxbt (3.0.1-1) noble; urgency=medium
+
+  * New release 3.0.1
+  * ### Bug Fixes
+  * **ppa**: Fixed issues with launchpad builds
+    ([#30](https://github.com/hannahbee91/nuxbt/pull/30),
+  *
+    [`5570f6d`](https://github.com/hannahbee91/nuxbt/commit/5570f6d161b8
+    6d35a367fe889bf9a57582356611))
+  * Using pbuilder locally helps me make sure these issues don't come
+    back.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Wed, 17 Dec 2025 20:32:28 +0000
+
 nuxbt (3.0.0-1) noble; urgency=medium
 
   * New release 3.0.0
