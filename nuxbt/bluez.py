@@ -210,7 +210,7 @@ def get_toggle_commands(enable):
     else:
         cmds.append(f"rm -f {override_path}")
         if python_path and os.path.isfile(python_path):
-             cmds.append(f"setcap -r {python_path}")
+             cmds.append(f"setcap -r {python_path} || true")
 
     # Reload and restart
     cmds.append("systemctl daemon-reload")
