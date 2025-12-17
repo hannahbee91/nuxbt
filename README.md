@@ -176,26 +176,25 @@ The webapp itself will be locally accessible at `http://127.0.0.1:8000` or, if y
 
 You should see a webpage similar to the following image:
 
-<div align="center">
-  <img src="/docs/img/nuxbt-webapp-start.png" alt="NUXBT Webapp Start Screen" width="600">
-</div>
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![NUXBT Webapp Start Light](/docs/img/nuxbt-webapp-start-light.png) | ![NUXBT Webapp Start Dark](/docs/img/nuxbt-webapp-start-dark.png) |
 
-To create and start a Pro Controller, click the Pro controller graphic. If creation/boot is successful, the website will switch to a loading screen. During this time, you should have the Nintendo Switch you wish to connect to powered on and within range of the host computer.
+To create and start a Pro Controller, click the "Create Pro Controller" button. If creation/boot is successful, the website will switch to the connected controller screen, with a pill showing the connection status. During this time, you should have the Nintendo Switch you wish to connect to powered on and within range of the host computer.
 
 **NOTE:** If this is your first time connecting to your Nintendo Switch with the specific host computer, make sure you're on the "Change Grip/Order Menu". If you're still unable to connect, try running the demo (in the above section) or refer to the troubleshooting documentation.
 
 Once you've successfully connected to the Nintendo Switch, you should see a webpage similar to below:
 
-<div align="center">
-  <img src="/docs/img/nuxbt-webapp-connected.png" alt="NUXBT Webapp Connected Screen" width="600">
-</div>
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![NUXBT Webapp Connected Light](/docs/img/nuxbt-webapp-keybindings-light.png) | ![NUXBT Webapp Connected Dark](/docs/img/nuxbt-webapp-keybindings-dark.png) |
 
-Here, you can change your input method, shutdown or restart the controller, and run an NUXBT macro.
+Here, you can shutdown or restart the controller, and use the Macros tab to create, manage, and run macros.
 
-A few other functions to note:
-- If you exit the webpage, the controller will shutdown.
-- Once you've connected over the "Change Grip/Order Menu", NUXBT will automatically reconnect. This applies on a per-Bluetooth-adapter basis.
-- Most gamepads should be usable over the browser. To get started with a gamepad, click a button and it should show up under the input dropdown list. If it doesn't show up, try another browser. Chrome is the recommended standard as it seems to have the best gamepad support currently (as of September 2020)
+| Light Mode | Dark Mode |
+| :---: | :---: |
+| ![NUXBT Webapp Macros Light](/docs/img/nuxbt-webapp-macros-light.png) | ![NUXBT Webapp Macros Dark](/docs/img/nuxbt-webapp-macros-dark.png) |
 
 ## Using the TUI
 
@@ -212,12 +211,12 @@ nuxbt tui
 A loading screen should open and, once connected, the main TUI control screen should load. This should look something like below:
 
 <div align="center">
-  <img src="docs/img/nuxbt-tui.png" alt="NUXBT TUI Connected" width="600">
+  ![NUXBT TUI Connected](docs/img/nuxbt-tui.png)
 </div>
 
 There are two types of NUXBT TUI sessions:
-1. **Remote Mode (pictured above):** When connecting over an SSH (or Mosh) connection, "Remote Mode" is used to compensate for keyup events not being sent over remote terminal sessions. This functionally means that "Remote Mode" is a bit less responsive than "Direct Mode".
-2. **Direct Mode:** When running the NUXBT TUI directly on the host computer, keyboard key presses are taken directly from any keyboard plugged in.
+1. **Remote Mode:** When connecting over an SSH (or Mosh) connection, "Remote Mode" is used to compensate for keyup events not being sent over remote terminal sessions. This functionally means that "Remote Mode" is a bit less responsive than "Direct Mode".
+2. **Direct Mode (pictured above):** When running the NUXBT TUI directly on the host computer, keyboard key presses are taken directly from any keyboard plugged in.
 
 Once you've successfully connected to a Nintendo Switch over the "Change Grip/Order Menu", you can reconnect quickly to the same Switch with the following command:
 
