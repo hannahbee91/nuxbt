@@ -11,6 +11,9 @@ override_dh_virtualenv:
 	rm -rf debian/nuxbt/opt
 	# Fix shebangs in the moved venv
 	find debian/nuxbt/usr/lib/nuxbt/bin -type f -exec sed -i 's|/opt/venvs/nuxbt|/usr/lib/nuxbt|g' {} +
+	
+override_dh_shlibdeps:
+	dh_shlibdeps -XPyQt6
 override_dh_installdeb:
 	dh_installdeb
 	# Patch the maintainer scripts to use correct path

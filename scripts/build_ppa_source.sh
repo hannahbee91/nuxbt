@@ -20,15 +20,19 @@ echo "3.0 (quilt)" > debian/source/format
 echo "Vendoring dependencies..."
 mkdir -p wheels
 poetry export --without-hashes --format=requirements.txt > requirements.txt
-pip download -r requirements.txt poetry-core setuptools wheel pip --dest wheels/ || pip download . poetry-core setuptools wheel pip --dest wheels/
-# Remove packages that we want to use from system (avoid building from sdist)
-rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
 
-# Remove these packages from requirements.txt so pip doesn't try to install them
+# Remove these packages from requirements.txt so pip doesn't try to install them (or download them)
 sed -i '/^[Pp]y[Gg][Oo]bject/Id' requirements.txt
 sed -i '/^dbus-python/d' requirements.txt
 sed -i '/^pycairo/d' requirements.txt
 sed -i '/^evdev/d' requirements.txt
+
+pip download --python-version 3.12 --only-binary=:all: --no-deps -r requirements.txt poetry-core setuptools wheel pip --dest wheels/ || pip download --python-version 3.12 --only-binary=:all: --no-deps . poetry-core setuptools wheel pip --dest wheels/
+
+# Remove packages that we want to use from system (avoid building from sdist)
+# (Though they shouldn't be downloaded now anyway)
+rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
+
 
 # Get version from pyproject.toml
 VERSION=$(grep "^version =" pyproject.toml | cut -d '"' -f 2)

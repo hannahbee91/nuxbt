@@ -35,6 +35,8 @@ overrides:
     - python3-evdev
     - python3-pyqt6
     - libxcb-cursor0
+    - libxcb-xinput0
+    - libxcb-xinerama0
   rpm:
     depends:
     - dbus-libs
@@ -45,6 +47,8 @@ overrides:
     - bluez
     - python3-evdev
     - python3-pyqt6
+    - libxcb
+    - xcb-util-cursor
 deb:
   scripts:
   triggers:
