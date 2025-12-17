@@ -113,7 +113,7 @@ class Sticks():
     LEFT_STICK = "L_STICK"
 
 
-class NxbtCommands(Enum):
+class NuxbtCommands(Enum):
     """An enumeration containing the nuxbt message
     commands.
     """
@@ -127,7 +127,7 @@ class NxbtCommands(Enum):
     QUIT = 6
 
 
-class Nxbt():
+class Nuxbt():
     """The nuxbt object implements the core multiprocessing logic
     and message passing API that acts as the central of the application.
     Upon creation, a multiprocessing Process is spun off to act at the
@@ -142,12 +142,15 @@ class Nxbt():
 
     def _check_bluez_version(self):
         """Checks the BlueZ version installed on the system."""
+        self.logger.info("Checking BlueZ version...")
         try:
             # Check bluetoothd version
             result = subprocess.run(['bluetoothd', '-v'], capture_output=True, text=True)
             if result.returncode == 0:
                 version = result.stdout.strip()
                 self.logger.info(f"BlueZ version: {version}")
+            else:
+                 self.logger.warning(f"Failed to check BlueZ version. Exit code: {result.returncode}")
         except FileNotFoundError:
             self.logger.warning("Could not find bluetoothd executable. Is BlueZ installed?")
         except Exception as e:
@@ -176,6 +179,7 @@ class Nxbt():
 
         create_logger(debug=debug, log_file_path=log_file_path, disable_logging=disable_logging)
         self.logger = logging.getLogger('nuxbt')
+        self.logger.info("Initializing Nuxbt...")
         self._check_bluez_version()
 
         # Main queue for nbxt tasks
@@ -201,12 +205,13 @@ class Nxbt():
 
         # Disable the BlueZ input plugin so we can use the
         # HID control/interrupt Bluetooth ports
-        toggle_clean_bluez(True)
+        # toggle_clean_bluez(True)
 
         # Exit handler
         atexit.register(self._on_exit)
 
         # Starting the nuxbt worker process
+        self.logger.info("Starting controller manager process...")
         self.controllers = Process(
             target=self._command_manager,
             args=((self.task_queue), (self.manager_state)))
@@ -217,6 +222,7 @@ class Nxbt():
         self.controllers.start()
 
         # Start the BlueZ Agent process
+        self.logger.info("Starting BlueZ agent process...")
         self.agent_process = Process(target=run_agent_loop)
         self.agent_process.daemon = True # Daemonize to kill with parent
         self.agent_process.start()
@@ -229,16 +235,20 @@ class Nxbt():
         all spun up multiprocessing Processes. This is done to
         ensure no zombie processes linger after exit.
         """
+        self.logger.info("Exiting Nuxbt...")
 
         # Need to explicitly kill the controllers process
         # since it isn't daemonized.
         if hasattr(self, "controllers") and self.controllers.is_alive():
             self.controllers.terminate()
-
-        self.manager.shutdown()
+        
+        try:
+             self.manager.shutdown()
+        except:
+             pass
 
         # Re-enable the BlueZ plugins, if we have permission
-        toggle_clean_bluez(False)
+        # toggle_clean_bluez(False)
 
     def _command_manager(self, task_queue, state):
         """Used as the main multiprocessing Process that is launched
@@ -258,6 +268,13 @@ class Nxbt():
         # Ensure a SystemExit exception is raised on SIGTERM
         # so that we can gracefully shutdown.
         signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(0))
+        
+        # We need to re-initialize logging in the child process because
+        # logging handlers are not inherited safely across processes in all cases,
+        # or at least we want to ensure we log to the same place if possible
+        # but standard logging to stderr should work.
+        logger = logging.getLogger('nuxbt')
+        logger.info("Controller Manager started.")
 
         try:
             while True:
@@ -267,7 +284,8 @@ class Nxbt():
                     msg = None
 
                 if msg:
-                    if msg["command"] == NxbtCommands.CREATE_CONTROLLER:
+                    logger.debug(f"Received command: {msg['command']}")
+                    if msg["command"] == NuxbtCommands.CREATE_CONTROLLER:
                         cm.create_controller(
                             msg["arguments"]["controller_index"],
                             msg["arguments"]["controller_type"],
@@ -275,19 +293,19 @@ class Nxbt():
                             msg["arguments"]["colour_body"],
                             msg["arguments"]["colour_buttons"],
                             msg["arguments"]["reconnect_address"])
-                    elif msg["command"] == NxbtCommands.INPUT_MACRO:
+                    elif msg["command"] == NuxbtCommands.INPUT_MACRO:
                         cm.input_macro(
                             msg["arguments"]["controller_index"],
                             msg["arguments"]["macro"],
                             msg["arguments"]["macro_id"])
-                    elif msg["command"] == NxbtCommands.STOP_MACRO:
+                    elif msg["command"] == NuxbtCommands.STOP_MACRO:
                         cm.stop_macro(
                             msg["arguments"]["controller_index"],
                             msg["arguments"]["macro_id"])
-                    elif msg["command"] == NxbtCommands.CLEAR_MACROS:
+                    elif msg["command"] == NuxbtCommands.CLEAR_MACROS:
                         cm.clear_macros(
                             msg["arguments"]["controller_index"])
-                    elif msg["command"] == NxbtCommands.REMOVE_CONTROLLER:
+                    elif msg["command"] == NuxbtCommands.REMOVE_CONTROLLER:
                         index = msg["arguments"]["controller_index"]
                         cm.clear_macros(index)
                         cm.remove_controller(index)
@@ -328,7 +346,7 @@ class Nxbt():
         # so we can check when the controller is done inputting it
         macro_id = os.urandom(24).hex()
         self.task_queue.put({
-            "command": NxbtCommands.INPUT_MACRO,
+            "command": NuxbtCommands.INPUT_MACRO,
             "arguments": {
                 "controller_index": controller_index,
                 "macro": macro,
@@ -448,7 +466,7 @@ class Nxbt():
             raise ValueError("Specified controller does not exist")
 
         self.task_queue.put({
-            "command": NxbtCommands.STOP_MACRO,
+            "command": NuxbtCommands.STOP_MACRO,
             "arguments": {
                 "controller_index": controller_index,
                 "macro_id": macro_id,
@@ -480,7 +498,7 @@ class Nxbt():
             raise ValueError("Specified controller does not exist")
 
         self.task_queue.put({
-            "command": NxbtCommands.CLEAR_MACROS,
+            "command": NuxbtCommands.CLEAR_MACROS,
             "arguments": {
                 "controller_index": controller_index,
             }
@@ -564,27 +582,37 @@ class Nxbt():
         :return: The index of the created controller
         :rtype: int
         """
+        self.logger.info("Creating controller...")
         if adapter_path:
             if adapter_path not in self.get_available_adapters():
+                self.logger.error(f"Specified adapter {adapter_path} is unavailable")
                 raise ValueError("Specified adapter is unavailable")
 
             if adapter_path in self._adapters_in_use.keys():
+                self.logger.error(f"Specified adapter {adapter_path} is in use")
                 raise ValueError("Specified adapter in use")
         else:
             # Get all adapters we can use
+            available = self.get_available_adapters()
+            if not available:
+                 self.logger.error("No available Bluetooth adapters found.")
+                 raise ValueError("No adapters available")
+                 
             usable_adapters = list(
-                set(self.get_available_adapters()) - set(self._adapters_in_use))
+                set(available) - set(self._adapters_in_use))
             if len(usable_adapters) > 0:
                 # Use the first available adapter
                 adapter_path = usable_adapters[0]
+                self.logger.info(f"Using adapter: {adapter_path}")
             else:
+                self.logger.error("All available adapters are in use.")
                 raise ValueError("No adapters available")
 
         controller_index = None
         try:
             self._controller_lock.acquire()
             self.task_queue.put({
-                "command": NxbtCommands.CREATE_CONTROLLER,
+                "command": NuxbtCommands.CREATE_CONTROLLER,
                 "arguments": {
                     "controller_index": self._controller_counter,
                     "controller_type": controller_type,
@@ -615,6 +643,7 @@ class Nxbt():
         finally:
             self._controller_lock.release()
 
+        self.logger.info(f"Controller {controller_index} created successfully.")
         return controller_index
 
     def remove_controller(self, controller_index):
@@ -643,7 +672,7 @@ class Nxbt():
             self._controller_lock.release()
 
         self.task_queue.put({
-            "command": NxbtCommands.REMOVE_CONTROLLER,
+            "command": NuxbtCommands.REMOVE_CONTROLLER,
             "arguments": {
                 "controller_index": controller_index,
             }

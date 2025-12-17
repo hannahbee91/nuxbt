@@ -4,7 +4,7 @@ from .controller import SwitchReportParser
 from .controller import SwitchResponses
 from .controller import Controller
 from .bluez import *
-from .nuxbt import Nxbt
+from .nuxbt import Nuxbt
 from .nuxbt import Buttons
 from .nuxbt import Sticks
 from .nuxbt import JOYCON_L

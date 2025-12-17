@@ -9,8 +9,8 @@ def runner():
     return CliRunner()
 
 @pytest.fixture
-def mock_nxbt():
-    with patch('nuxbt.cli.Nxbt') as mock:
+def mock_nuxbt():
+    with patch('nuxbt.cli.Nuxbt') as mock:
         yield mock
 
 @pytest.fixture
@@ -41,11 +41,11 @@ def test_help(runner):
 def test_webapp_command(runner, mock_start_web_app):
     result = runner.invoke(main, ['webapp', '-i', '127.0.0.1', '-p', '5000', '--usessl'])
     assert result.exit_code == 0
-    mock_start_web_app.assert_called_once_with(ip='127.0.0.1', port=5000, usessl=True, cert_path=None)
+    mock_start_web_app.assert_called_once_with(ip='127.0.0.1', port=5000, usessl=True, cert_path=None, debug=False)
 
-def test_demo_command(runner, mock_nxbt):
+def test_demo_command(runner, mock_nuxbt):
     # Mocking behavior for demo
-    instance = mock_nxbt.return_value
+    instance = mock_nuxbt.return_value
     instance.get_available_adapters.return_value = ['/org/bluez/hci0']
     instance.create_controller.return_value = 0
     instance.macro.return_value = "macro_id"
@@ -63,8 +63,8 @@ def test_macro_command_no_args_fails(runner):
     assert result.exit_code == 0
     assert "No macro commands were specified" in result.output
 
-def test_macro_command_string(runner, mock_nxbt):
-    instance = mock_nxbt.return_value
+def test_macro_command_string(runner, mock_nuxbt):
+    instance = mock_nuxbt.return_value
     instance.create_controller.return_value = 0
     instance.wait_for_connection.return_value = None
     instance.macro.return_value = "mid"
@@ -88,7 +88,7 @@ def test_tui_command(runner, mock_input_tui):
     mock_input_tui.assert_called_once()
     mock_input_tui.return_value.start.assert_called_once()
 
-def test_test_command_timeout(runner, mock_nxbt):
+def test_test_command_timeout(runner, mock_nuxbt):
     # This is tricky because the test command has sleeps and loops.
     # We want to verify that the timeout argument is respected.
     # We can probably infer it by mocking time to jump forward?
@@ -96,7 +96,7 @@ def test_test_command_timeout(runner, mock_nxbt):
     # Wait, the code prints "Connection timeout is {timeout} seconds for this test script."
     
     # We need to ensure we don't actually hang or fail early in the mocks
-    instance = mock_nxbt.return_value
+    instance = mock_nuxbt.return_value
     instance.get_available_adapters.return_value = ['hci0']
     instance.create_controller.return_value = 0
     # Make state connected immediately so we don't wait
@@ -109,11 +109,11 @@ def test_test_command_timeout(runner, mock_nxbt):
     assert result.exit_code == 0
     assert "Connection timeout is 50 seconds" in result.output
 
-def test_logging_flags_default(runner, mock_nxbt):
+def test_logging_flags_default(runner, mock_nuxbt):
     # Test -l flag
-    with patch('nuxbt.cli.Nxbt') as mock_nx:
-         # Need to invoke a command that instantiates Nxbt, e.g., demo
-         # And we need to mock other things so demo doesn't fail before Nxbt init
+    with patch('nuxbt.cli.Nuxbt') as mock_nx:
+         # Need to invoke a command that instantiates Nuxbt, e.g., demo
+         # And we need to mock other things so demo doesn't fail before Nuxbt init
          instance = mock_nx.return_value
          instance.get_available_adapters.return_value = ['hci0']
          instance.create_controller.return_value = 0
@@ -123,13 +123,13 @@ def test_logging_flags_default(runner, mock_nxbt):
 
          result = runner.invoke(main, ['-l', 'demo'])
          assert result.exit_code == 0
-         # Check if log_file_path was passed as True to Nxbt
+         # Check if log_file_path was passed as True to Nuxbt
          call_kwargs = mock_nx.call_args[1]
          assert call_kwargs['log_file_path'] is True
 
-def test_logging_flags_custom(runner, mock_nxbt):
+def test_logging_flags_custom(runner, mock_nuxbt):
     # Test --logfile custom.log
-    with patch('nuxbt.cli.Nxbt') as mock_nx:
+    with patch('nuxbt.cli.Nuxbt') as mock_nx:
          instance = mock_nx.return_value
          instance.get_available_adapters.return_value = ['hci0']
          instance.create_controller.return_value = 0

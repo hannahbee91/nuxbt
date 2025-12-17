@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
   # Explicitly create a shared folder of the Vagrantfile directory at /vagrant in the VM
   config.vm.synced_folder ".", "/vagrant"
 
-  # Install NXBT
+  # Install NUXBT
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y python3-pip bluez bluetooth pkg-config build-essential libdbus-glib-1-dev libgirepository1.0-dev libcairo2-dev libgirepository-2.0-dev

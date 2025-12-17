@@ -1,11 +1,11 @@
-name: CI
+name: Check Commits and Run Tests
 
 on:
   pull_request:
-    branches: [ main ]
-
+    branches: main
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -58,3 +58,120 @@ jobs:
 
       - name: Check Conventional Commits
         uses: webiny/action-conventional-commits@v1.1.0
+
+  package:
+    name: Create Preview Packages
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libdbus-glib-1-dev libdbus-1-dev libcairo2-dev libgirepository-2.0-dev libgirepository1.0-dev pkg-config debhelper devscripts dh-virtualenv dput python3-poetry-core python3-cairo python3-evdev
+
+      - name: Install Poetry
+        run: |
+            pip install poetry
+            poetry self add poetry-plugin-export
+
+      - name: Install project dependencies
+        run: poetry install --sync --no-interaction
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: './nuxbt/web/client/package-lock.json'
+
+      - name: Build Frontend
+        working-directory: ./nuxbt/web/client
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build package
+        run: poetry build
+
+      - name: Build Virtual Environment
+        run: |
+          mkdir -p dist/usr/lib/nuxbt
+          python3 -m venv dist/usr/lib/nuxbt
+          poetry export --without-hashes --format=requirements.txt > requirements.txt
+          source dist/usr/lib/nuxbt/bin/activate
+          pip install -r requirements.txt
+          pip install dist/*.whl
+          sed -i 's|#!'"$PWD"'/dist/usr/lib/nuxbt|#!/usr/lib/nuxbt|g' dist/usr/lib/nuxbt/bin/*
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Install NFPM
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update
+          sudo apt-get install -y nfpm
+
+      - name: Build DEB and RPM packages
+        env:
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: |
+          # Extract version from pyproject.toml
+          CURRENT_VERSION=$(grep -m 1 version pyproject.toml | awk '{print $3}' | tr -d '"')
+          # Current version format is likely X.Y.Z
+          # We want X.Y.<run_id>
+          MAJOR_MINOR=$(echo $CURRENT_VERSION | cut -d. -f1-2)
+          export VERSION="${MAJOR_MINOR}.${{ github.run_id }}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
+          echo "Building version: $VERSION"
+          
+          # Run NFPM
+          nfpm pkg --packager deb --target dist/nuxbt_${VERSION}_amd64.deb
+          nfpm pkg --packager rpm --target dist/nuxbt-${VERSION}.x86_64.rpm
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxbt-packages
+          path: |
+            dist/*.deb
+            dist/*.rpm
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- nuxbt-pr-artifacts -->"
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- nuxbt-pr-artifacts -->
+            ### 📦 Nuxbt Packages Built
+            
+            Build for commit ${{ github.sha }} is complete.
+            
+            **Version**: `${{ env.VERSION }}` (Mocked with Run ID)
+            
+            Artifacts are available in the workflow summary: [Download Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          edit-mode: replace

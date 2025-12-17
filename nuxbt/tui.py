@@ -6,7 +6,7 @@ import multiprocessing
 
 from blessed import Terminal
 
-from .nuxbt import Nxbt, PRO_CONTROLLER
+from .nuxbt import Nuxbt, PRO_CONTROLLER
 
 
 class LoadingSpinner():
@@ -326,9 +326,9 @@ class InputTUI():
 
         # Initializing a controller
         if not self.debug:
-            self.nx = Nxbt(disable_logging=True)
+            self.nx = Nuxbt(disable_logging=True)
         else:
-            self.nx = Nxbt(debug=self.debug, logfile=self.logfile)
+            self.nx = Nuxbt(debug=self.debug, logfile=self.logfile)
         self.controller_index = self.nx.create_controller(
             PRO_CONTROLLER,
             reconnect_address=self.reconnect_target)

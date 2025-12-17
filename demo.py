@@ -60,7 +60,7 @@ def random_colour():
 if __name__ == "__main__":
 
     # Init NUXBT
-    nx = nuxbt.Nxbt()
+    nx = nuxbt.Nuxbt()
 
     # Get a list of all available Bluetooth adapters
     adapters = nx.get_available_adapters()

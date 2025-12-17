@@ -9,14 +9,14 @@ if 'dbus' not in sys.modules:
     sys.modules['dbus'] = MagicMock()
 
 from nuxbt.web import app
-from nuxbt import Nxbt, PRO_CONTROLLER
+from nuxbt import Nuxbt, PRO_CONTROLLER
 
 # Flag to signal server to shutdown
 shutdown_flag = threading.Event()
 
 @pytest.fixture(scope="module")
 def mock_backend():
-    """Mock the Nxbt backend in the webapp."""
+    """Mock the Nuxbt backend in the webapp."""
     with patch('nuxbt.web.app.nuxbt') as mock_nuxbt:
         # Configuration for mocks
         mock_nuxbt.get_switch_addresses.return_value = []

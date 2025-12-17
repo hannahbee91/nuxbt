@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nxbt">NXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
+<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nuxbt">NUXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
 
 <h4 align="center">Control your Nintendo Switch through a website, terminal, or macro.</h4>
 
@@ -37,11 +37,11 @@
 - Use your terminal to control a Nintendo Switch with a keyboard.
 - Use a macro from your terminal, browser, or Python script
 - Use the NUXBT Python API to write programs to control your Nintendo Switch.
-- Primitive loop support in macros.
+- Robust loop support for macros in the webapp.
 - In-depth command line interface.
-- Support for emulating multiple controllers at once.
+- Support for emulating multiple controllers at once (requires multiple bluetooth adapters).
 - Support for fast connection or reconnection to a Nintendo Switch.
-- Emulated ontrollers support thread-safe access.
+- Emulated controllers support thread-safe access.
 - Record and replay macros through the webapp.
 
 ## Installation
@@ -81,7 +81,7 @@ This will properly install dependencies and available update the `nuxbt` command
 
   **Running NUXBT:**
   ```bash
-  sudo nuxbt
+  nuxbt
   ```
 
 ### Linux (Manual / Pip)
@@ -92,15 +92,20 @@ pip --user install nuxbt
 
 This will install NUXBT into your current Python environment, for your user only.
 
-### Post-installation
+### Bluetooth Permissions
 
-You can add a nuxbt alias to your .bashrc or .zshrc file to run NUXBT from however you installed it, to prevent having to use sudo every time.
+NUXBT requires the BlueZ Input plugin to be disabled to function correctly as a controller.
 
+To check the status of the plugin:
 ```bash
-alias nuxbt="sudo -E $(which nuxbt)"
+nuxbt check
 ```
 
-**Please Note:** NUXBT needs root privileges to toggle the BlueZ Input plugin. As such, the alias includes `sudo`. By using `which nuxbt`, we ensure that the alias points to the correct nuxbt executable, even if it's in a virtual environment. If you're using pyenv, you can use `$(pyenv which nuxbt)` instead of `$(which nuxbt)`.
+To toggle the plugin (enable/disable):
+```bash
+nuxbt toggle
+```
+**Note:** Toggling the plugin will request `sudo` permissions to modify system Bluetooth configuration.
 
 ### Windows and macOS
 
@@ -135,14 +140,12 @@ npm run build
 This will compile the React app and place the assets into `nuxbt/web/static`, where the Python backend expects them.
 
 ### 3. Running Locally
-Once built, you can run the webapp using Poetry. Note that `sudo` is often required for Bluetooth access on Linux.
+Once built, you can run the webapp using Poetry.
 
 ```bash
 # Run the webapp pointing to the poetry environment
-sudo -E $(poetry which nuxbt) webapp
+$(poetry which nuxbt) webapp
 ```
-
-*Note: The `-E` flag preserves your environment variables, allowing sudo to see your virtual environment configuration, and `$(poetry which nuxbt)` ensures we use the executable from the poetry VEnv.*
 
 ## Getting Started
 
@@ -288,7 +291,7 @@ B 0.1s
 """
 
 # Start the NUXBT service
-nx = nuxbt.Nxbt()
+nx = nuxbt.Nuxbt()
 
 # Create a Pro Controller and wait for it to connect
 controller_index = nx.create_controller(nuxbt.PRO_CONTROLLER)
@@ -328,7 +331,7 @@ For those looking to get started with a few simple examples: Read on!
 import nuxbt
 
 # Start the NUXBT service
-nx = nuxbt.Nxbt()
+nx = nuxbt.Nuxbt()
 
 # Create a Pro Controller and wait for it to connect
 controller_index = nx.create_controller(nuxbt.PRO_CONTROLLER)
