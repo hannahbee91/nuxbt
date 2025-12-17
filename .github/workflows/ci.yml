@@ -4,6 +4,15 @@ on:
   pull_request:
     branches: main
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check Conventional Commits
+        uses: webiny/action-conventional-commits@v1.1.0
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -27,7 +36,7 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --sync --no-interaction
 
       - name: Install Playwright browsers
         run: poetry run playwright install chromium
@@ -48,16 +57,6 @@ jobs:
 
       - name: Backend Tests
         run: poetry run pytest
-
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check Conventional Commits
-        uses: webiny/action-conventional-commits@v1.1.0
 
   package:
     name: Create Preview Packages

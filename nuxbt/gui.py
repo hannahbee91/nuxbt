@@ -2,6 +2,7 @@ import sys
 import subprocess
 import webbrowser
 import os
+import psutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QMessageBox, QLineEdit)
 from PyQt6.QtGui import QPixmap
@@ -15,6 +16,9 @@ class NuxbtGUI(QMainWindow):
         super().__init__()
         self.setWindowTitle("NUXBT")
         self.setMinimumSize(600, 300)
+        
+        self.webapp_pid = None
+        self.webapp_process = None
 
         # Setup UI
         central_widget = QWidget()
@@ -83,9 +87,14 @@ class NuxbtGUI(QMainWindow):
         btn_row = QHBoxLayout(btn_row_widget)
         btn_row.setContentsMargins(0, 0, 0, 0)
         
-        self.launch_web_btn = QPushButton("Launch WebApp")
-        self.launch_web_btn.clicked.connect(self.launch_webapp)
-        self.launch_web_btn.setMinimumHeight(40)
+        self.main_webapp_btn = QPushButton("Launch WebApp")
+        self.main_webapp_btn.clicked.connect(self.handle_webapp_action)
+        self.main_webapp_btn.setMinimumHeight(40)
+
+        self.open_webapp_btn = QPushButton("Open WebApp")
+        self.open_webapp_btn.clicked.connect(self.open_webapp)
+        self.open_webapp_btn.setMinimumHeight(40)
+        self.open_webapp_btn.setVisible(False)
         
         self.options_toggle_btn = QPushButton("▼") # or ▶
         self.options_toggle_btn.setFixedSize(40, 40)
@@ -93,7 +102,8 @@ class NuxbtGUI(QMainWindow):
         self.options_toggle_btn.toggled.connect(self.toggle_options)
         self.options_toggle_btn.setText("▶") # Start collapsed
         
-        btn_row.addWidget(self.launch_web_btn)
+        btn_row.addWidget(self.main_webapp_btn)
+        btn_row.addWidget(self.open_webapp_btn)
         btn_row.addWidget(self.options_toggle_btn)
         
         webapp_layout.addWidget(btn_row_widget)
@@ -163,16 +173,25 @@ class NuxbtGUI(QMainWindow):
             self.status_label.setText("NUXBT Plugin Enabled")
             self.status_label.setStyleSheet("color: green; font-weight: bold;")
             self.status_light.setStyleSheet("color: green;")
-            self.launch_web_btn.setEnabled(True)
+            
+            # Check webapp state
+            self.check_webapp_state()
+            
+            self.main_webapp_btn.setEnabled(True)
             self.launch_tui_btn.setEnabled(True)
-            self.host_input.setEnabled(True)
-            self.port_input.setEnabled(True)
+            
+            # Only enable inputs if webapp is NOT running
+            if not self.webapp_pid:
+                self.host_input.setEnabled(True)
+                self.port_input.setEnabled(True)
+            
             self.options_toggle_btn.setEnabled(True)
         else:
             self.status_label.setText("NUXBT Plugin Disabled")
             self.status_label.setStyleSheet("color: red; font-weight: bold;")
             self.status_light.setStyleSheet("color: red;")
-            self.launch_web_btn.setEnabled(False)
+            self.main_webapp_btn.setEnabled(False)
+            self.open_webapp_btn.setVisible(False)
             self.launch_tui_btn.setEnabled(False)
             self.host_input.setEnabled(False)
             self.port_input.setEnabled(False)
@@ -231,8 +250,136 @@ class NuxbtGUI(QMainWindow):
         
         return None
 
+    def find_running_webapp(self):
+        """Find any running nuxbt webapp process."""
+        current_pid = os.getpid()
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                # Check for python process running nuxbt webapp
+                cmdline = proc.info['cmdline']
+                if cmdline:
+                    # Check if 'webapp' is an argument
+                    if 'webapp' in cmdline:
+                        # Check if 'nuxbt' is in any argument (e.g. path to script)
+                        if any('nuxbt' in arg for arg in cmdline):
+                            if proc.pid != current_pid: 
+                                return proc
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return None
+
+    def check_webapp_state(self):
+        # Check if our child process is still alive
+        if self.webapp_process:
+            if self.webapp_process.poll() is not None:
+                self.webapp_process = None
+                self.webapp_pid = None
+        
+        # If not, check for external process
+        if not self.webapp_process:
+            proc = self.find_running_webapp()
+            if proc:
+                self.webapp_pid = proc.pid
+            else:
+                self.webapp_pid = None
+        
+        # Update UI
+        if self.webapp_pid:
+            self.main_webapp_btn.setText("Stop WebApp")
+            self.main_webapp_btn.setStyleSheet("background-color: #d30000;") 
+            self.open_webapp_btn.setVisible(True)
+            self.host_input.setEnabled(False)
+            self.port_input.setEnabled(False)
+        else:
+            self.main_webapp_btn.setText("Launch WebApp")
+            self.main_webapp_btn.setStyleSheet("")
+            self.open_webapp_btn.setVisible(False)
+            self.host_input.setEnabled(True)
+            self.port_input.setEnabled(True)
+
+    def handle_webapp_action(self):
+        if self.webapp_pid:
+            self.stop_webapp()
+        else:
+            self.launch_webapp()
+
+    def stop_webapp(self):
+        # Update UI first
+        self.main_webapp_btn.setText("Stopping...")
+        self.main_webapp_btn.setEnabled(False)
+        QApplication.processEvents()
+        
+        # Perform robust cleanup
+        self.terminate_all_webapps()
+        
+        # Refresh status to reset UI state
+        self.update_status()
+
+    def terminate_all_webapps(self):
+        """Robustly terminate all known and unknown webapp processes."""
+        # 1. Terminate our child process if we have the handle
+        if self.webapp_process:
+            print("Terminating child process...")
+            self.webapp_process.terminate()
+            try:
+                self.webapp_process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                 self.webapp_process.kill()
+            self.webapp_process = None
+
+        # 2. Terminate tracked pid if different or handle lost
+        if self.webapp_pid:
+             print(f"Terminating tracked process {self.webapp_pid}...")
+             try:
+                 proc = psutil.Process(self.webapp_pid)
+                 if proc.is_running():
+                     proc.terminate()
+                     proc.wait(timeout=2)
+             except (psutil.NoSuchProcess, psutil.TimeoutExpired):
+                 pass # Process gone or timeout handled below
+             except Exception as e:
+                 print(f"Error terminating tracked: {e}")
+             self.webapp_pid = None
+
+        # 3. Sweep for ANY leftover nuxbt webapp processes to be safe
+        print("Sweeping for leftover webapp processes...")
+        
+        # We iterate max 3 times to be sure
+        for _ in range(3):
+            leftover = self.find_running_webapp()
+            if not leftover:
+                break
+            
+            print(f"Found leftover process {leftover.pid}. Killing...")
+            try:
+                leftover.terminate()
+                leftover.wait(timeout=1)
+            except psutil.TimeoutExpired:
+                try:
+                    leftover.kill()
+                except:
+                    pass
+            except psutil.NoSuchProcess:
+                pass
+
+    def open_webapp(self):
+        host = self.host_input.text()
+        if host == "0.0.0.0":
+            host = "localhost"
+        port = self.port_input.text()
+        webbrowser.open(f"http://{host}:{port}")
+
     def launch_webapp(self):
         try:
+            # Check if already running first
+            existing = self.find_running_webapp()
+            if existing: # Should be covered by update_status but double check
+                 self.webapp_pid = existing.pid
+                 self.update_status()
+                 QMessageBox.information(self, "Info", "WebApp is already running.")
+                 self.open_webapp()
+                 return
+
             host = self.host_input.text()
             port = self.port_input.text()
             
@@ -243,18 +390,15 @@ class NuxbtGUI(QMainWindow):
             
             # Launch background process
             # nuxbt webapp -i HOST -p PORT
-            subprocess.Popen(["nuxbt", "webapp", "-i", host, "-p", port], 
+            self.webapp_process = subprocess.Popen(["nuxbt", "webapp", "-i", host, "-p", port], 
                              stdout=subprocess.DEVNULL, 
                              stderr=subprocess.DEVNULL,
                              start_new_session=True)
+            self.webapp_pid = self.webapp_process.pid
             
             # Open browser
-            # If host is 0.0.0.0, use localhost for browser
-            browser_host = host
-            if host == "0.0.0.0":
-                browser_host = "localhost"
-                
-            QTimer.singleShot(1000, lambda: webbrowser.open(f"http://{browser_host}:{port}"))
+            QTimer.singleShot(1000, self.open_webapp)
+            self.update_status()
             
         except Exception as e:
              QMessageBox.critical(self, "Error", f"Failed to launch webapp: {e}")
@@ -270,6 +414,31 @@ class NuxbtGUI(QMainWindow):
                  QMessageBox.warning(self, "Error", "Could not find terminal emulator.")
         except Exception as e:
              QMessageBox.critical(self, "Error", f"Failed to launch TUI: {e}")
+
+    def closeEvent(self, event):
+        # This method is called when the application main window is closed
+        try:
+            # Show a popup to inform the user
+            popup = QMessageBox(self)
+            popup.setWindowTitle("NUXBT")
+            popup.setText("Terminating Background Processes...")
+            popup.setStandardButtons(QMessageBox.StandardButton.NoButton)
+            popup.setWindowModality(Qt.WindowModality.ApplicationModal)
+            popup.show()
+            
+            # Force UI update so the popup draws
+            QApplication.processEvents()
+
+            # Check for any running webapp that we know about
+            self.check_webapp_state() # Update state one last time
+            
+            # Use the shared robust cleanup
+            self.terminate_all_webapps()
+        
+        except Exception as e:
+            print(f"Error in closeEvent: {e}")
+            
+        event.accept() # Accept the close event
 
 def start_gui():
     app = QApplication(sys.argv)
