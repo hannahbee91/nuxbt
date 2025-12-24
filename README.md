@@ -37,7 +37,7 @@
 - Use your terminal to control a Nintendo Switch with a keyboard.
 - Use a macro from your terminal, browser, or Python script
 - Use the NUXBT Python API to write programs to control your Nintendo Switch.
-- Robust loop support for macros in the webapp.
+- Robust loop and hold support for macros in the webapp.
 - In-depth command line interface.
 - Support for emulating multiple controllers at once (requires multiple bluetooth adapters).
 - Support for fast connection or reconnection to a Nintendo Switch.

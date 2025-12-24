@@ -309,6 +309,7 @@ class InputParser():
         parsed = list(filter(lambda s: not s.strip() == "", parsed))
         parsed = list(filter(lambda s: not s.strip().startswith("#"), parsed))
         parsed = self.parse_loops(parsed)
+        parsed = self.parse_holds(parsed)
 
         return parsed
 
@@ -322,37 +323,98 @@ class InputParser():
                 loop_buffer = []
 
                 # Detect delimiter and record
-                if macro[i+1].startswith("\t"):
-                    loop_delimiter = "\t"
-                elif macro[i+1].startswith("    "):
-                    loop_delimiter = "    "
-                else:
-                    loop_delimiter = "  "
-
-                # Gather looping commands
-                for j in range(i+1, len(macro)):
-                    loop_line = macro[j]
-                    if loop_line.startswith(loop_delimiter):
-                        # Replace the first instance of the delimiter
-                        loop_line = loop_line.replace(loop_delimiter, "", 1)
-                        loop_buffer.append(loop_line)
-                    # Set the new position if we either encounter the end
-                    # of the loop or we reach the end of the macro
+                if i + 1 < len(macro):
+                    if macro[i+1].startswith("\t"):
+                        loop_delimiter = "\t"
+                    elif macro[i+1].startswith("    "):
+                        loop_delimiter = "    "
                     else:
-                        i = j - 1
-                        break
-                    if j+1 >= len(macro):
-                        i = j
+                        loop_delimiter = "  "
+                else:
+                    # Loop with no body - just ignore or break
+                    # Existing code would crash here likely so we fix it
+                    loop_delimiter = None
 
-                # Recursively gather other loops if present
-                if any(s.startswith("LOOP") for s in loop_buffer):
-                    loop_buffer = self.parse_loops(loop_buffer)
-                # Multiply out the loop and concatenate
-                parsed = parsed + (loop_buffer * loop_count)
+                if loop_delimiter:
+                    # Gather looping commands
+                    for j in range(i+1, len(macro)):
+                        loop_line = macro[j]
+                        if loop_line.startswith(loop_delimiter):
+                            # Replace the first instance of the delimiter
+                            loop_line = loop_line.replace(loop_delimiter, "", 1)
+                            loop_buffer.append(loop_line)
+                        # Set the new position if we either encounter the end
+                        # of the loop or we reach the end of the macro
+                        else:
+                            i = j - 1
+                            break
+                        if j+1 >= len(macro):
+                            i = j
+
+                    # Recursively gather other loops if present
+                    if any(s.startswith("LOOP") for s in loop_buffer):
+                        loop_buffer = self.parse_loops(loop_buffer)
+                    # Multiply out the loop and concatenate
+                    parsed = parsed + (loop_buffer * loop_count)
             else:
                 parsed.append(line)
             i += 1
 
+        return parsed
+
+    def parse_holds(self, macro):
+        parsed = []
+        i = 0
+        while i < len(macro):
+            line = macro[i]
+            if line.strip().startswith("HOLD "):
+                held_input = line.strip()[5:].strip()
+                hold_buffer = []
+
+                # Detect delimiter and record
+                if i + 1 < len(macro):
+                    next_line = macro[i+1]
+                    if next_line.startswith("\t"):
+                        hold_delimiter = "\t"
+                    elif next_line.startswith("    "):
+                        hold_delimiter = "    "
+                    elif next_line.startswith("  "):
+                        hold_delimiter = "  "
+                    else:
+                        hold_delimiter = None
+                else:
+                    hold_delimiter = None
+
+                if hold_delimiter:
+                    # Gather holding commands
+                    for j in range(i+1, len(macro)):
+                        hold_line = macro[j]
+                        if hold_line.startswith(hold_delimiter):
+                            # Replace the first instance of the delimiter
+                            hold_line = hold_line.replace(hold_delimiter, "", 1)
+                            hold_buffer.append(hold_line)
+                        else:
+                            i = j - 1
+                            break
+                        if j+1 >= len(macro):
+                            i = j
+
+                # Recursively process buffer
+                if hold_buffer:
+                    # Expand loops inside the hold block first
+                    hold_buffer = self.parse_loops(hold_buffer)
+                    # Then process nested holds
+                    hold_buffer = self.parse_holds(hold_buffer)
+                    
+                    # Apply held input
+                    for k in range(len(hold_buffer)):
+                        hold_buffer[k] = held_input + " " + hold_buffer[k]
+                    
+                    parsed.extend(hold_buffer)
+            else:
+                parsed.append(line)
+            i += 1
+        
         return parsed
 
     def set_macro_input(self, macro_input):

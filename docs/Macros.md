@@ -77,6 +77,28 @@ LOOP 100
     LOOP 5
         A 0.1s
         0.1s
+
+### Holding Inputs
+
+The `HOLD` keyword allows you to hold a specific input (like a button or stick) while executing a block of other macro commands. This is useful for actions that require holding a button down while performing other actions.
+
+```
+HOLD DPAD_DOWN
+    A 0.1s
+    0.1s
+```
+
+In the example above, `DPAD_DOWN` is held down while `A` is pressed for 0.1s, and then `DPAD_DOWN` continues to be held for another 0.1s.
+
+Nested holds are also supported:
+
+```
+HOLD ZL
+    HOLD ZR
+        A 0.1s
+```
+
+This holds both ZL and ZR while pressing A.
 ```
 
 Note, a macro line starting with `#` is ignored.
