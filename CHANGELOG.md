@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v3.1.1 (2025-12-30)
+
+### Bug Fixes
+
+- **macros**: Macros now properly implemented held inputs
+  ([`aa47b54`](https://github.com/hannahbee91/nuxbt/commit/aa47b541ae16ba06af91775a61c5b0755888dc84))
+
+* fix(macros): Macros now properly implemented held inputs
+
+feat(webapp): Keybinds can now be customized for keyboard and gamepad input
+
+feat(macros): Macros now support categories
+
+fix(plugin): Toggling the plugin now uses `realpath` to ensure the proper python executable gets
+  capabilities set
+
+* fix(tests): Fixed frontend tests for new elements and layout
+
+
 ## v3.1.0 (2025-12-24)
 
 ### Features
