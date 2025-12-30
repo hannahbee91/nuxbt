@@ -156,7 +156,7 @@ def get_toggle_commands(enable):
     # Path to the python executable running this code
     # We want to set capabilities on this interpreter so it can access raw sockets
     # without running as root.
-    python_path = sys.executable
+    python_path = os.path.realpath(sys.executable)
 
     if enable:
         service_path = get_bluez_service_path()

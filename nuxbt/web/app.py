@@ -54,11 +54,28 @@ def get_macro_dir():
 @app.route('/api/macros', methods=['GET'])
 def list_macros():
     macro_dir = get_macro_dir()
-    macros = []
+    macros = {}
+    
     if os.path.exists(macro_dir):
+        # Check root for uncategorized macros
+        root_macros = []
         for f in os.listdir(macro_dir):
-            if f.endswith(".txt"):
-                macros.append(f[:-4])  # Remove .txt extension
+            full_path = os.path.join(macro_dir, f)
+            if os.path.isfile(full_path) and f.endswith(".txt"):
+                root_macros.append(f[:-4])
+            elif os.path.isdir(full_path):
+                # This is a category
+                cat_name = f
+                cat_macros = []
+                for subf in os.listdir(full_path):
+                    if subf.endswith(".txt"):
+                        cat_macros.append(subf[:-4])
+                if cat_macros:
+                    macros[cat_name] = sorted(cat_macros)
+        
+        if root_macros:
+            macros["Uncategorized"] = sorted(root_macros)
+            
     return json.dumps(macros)
 
 
@@ -66,16 +83,36 @@ def list_macros():
 def save_macro():
     data = request.json
     name = data.get("name")
+    category = data.get("category", "Uncategorized")
     content = data.get("macro")
     
     if not name or not content:
         return "Missing name or content", 400
     
-    # Sanitize name to prevent directory traversal
+    # Sanitize
     name = "".join(x for x in name if x.isalnum() or x in " -_")
+    category = "".join(x for x in category if x.isalnum() or x in " -_")
     
+    if not name or not category:
+        return "Invalid name or category", 400
+
     macro_dir = get_macro_dir()
-    file_path = os.path.join(macro_dir, f"{name}.txt")
+    
+    # Check if category directory exists, create if not
+    # Treat "Uncategorized" as the root directory? 
+    # Or actually make a folder "Uncategorized"?
+    # Decision: treating "Uncategorized" as root for backward compat might be confusing if we mix files.
+    # Let's explicitly create an "Uncategorized" folder if they save there, 
+    # BUT previously saved files are in root.
+    # Migration: simpler to just use root for "Uncategorized"?
+    # If I use root for "Uncategorized", I need to handle that logic.
+    
+    target_dir = macro_dir
+    if category != "Uncategorized":
+        target_dir = os.path.join(macro_dir, category)
+    
+    os.makedirs(target_dir, exist_ok=True)
+    file_path = os.path.join(target_dir, f"{name}.txt")
     
     with open(file_path, "w") as f:
         f.write(content)
@@ -84,12 +121,23 @@ def save_macro():
 
 
 @app.route('/api/macros/<name>', methods=['GET'])
-def get_macro(name):
-    # Sanitize name
+def get_macro_root(name):
+    # Backward compatibility: look in root (Uncategorized concept)
+    return get_macro("Uncategorized", name)
+
+@app.route('/api/macros/<category>/<name>', methods=['GET'])
+def get_macro(category, name):
     name = "".join(x for x in name if x.isalnum() or x in " -_")
+    category = "".join(x for x in category if x.isalnum() or x in " -_")
     
     macro_dir = get_macro_dir()
-    file_path = os.path.join(macro_dir, f"{name}.txt")
+    if category == "Uncategorized":
+        # Check root first for backward compat, then explicit folder
+        file_path = os.path.join(macro_dir, f"{name}.txt")
+        if not os.path.exists(file_path):
+             file_path = os.path.join(macro_dir, category, f"{name}.txt")
+    else:
+        file_path = os.path.join(macro_dir, category, f"{name}.txt")
     
     if not os.path.exists(file_path):
         return "Macro not found", 404
@@ -101,19 +149,71 @@ def get_macro(name):
 
 
 @app.route('/api/macros/<name>', methods=['DELETE'])
-def delete_macro(name):
-    # Sanitize name
+def delete_macro_root(name):
+    return delete_macro("Uncategorized", name)
+
+@app.route('/api/macros/<category>/<name>', methods=['DELETE'])
+def delete_macro(category, name):
     name = "".join(x for x in name if x.isalnum() or x in " -_")
+    category = "".join(x for x in category if x.isalnum() or x in " -_")
     
     macro_dir = get_macro_dir()
-    file_path = os.path.join(macro_dir, f"{name}.txt")
     
-    if os.path.exists(file_path):
-        os.remove(file_path)
+    # Helper to delete
+    did_delete = False
+    
+    if category == "Uncategorized":
+        # Check root
+        p1 = os.path.join(macro_dir, f"{name}.txt")
+        if os.path.exists(p1):
+            os.remove(p1)
+            did_delete = True
+        
+        # Check folder
+        p2 = os.path.join(macro_dir, category, f"{name}.txt")
+        if os.path.exists(p2):
+            os.remove(p2)
+            did_delete = True
+    else:
+        p = os.path.join(macro_dir, category, f"{name}.txt")
+        if os.path.exists(p):
+            os.remove(p)
+            did_delete = True
+            
+        # Clean up empty category directory
+        cat_dir = os.path.join(macro_dir, category)
+        if os.path.exists(cat_dir) and not os.listdir(cat_dir):
+            os.rmdir(cat_dir)
+
+    if did_delete:
         return "Deleted", 200
     else:
         return "Macro not found", 404
 
+
+@app.route('/api/keybinds', methods=['GET'])
+def get_keybinds():
+    config_dir = get_config_dir()
+    path = os.path.join(config_dir, "keybinds.json")
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            try:
+                return f.read(), 200, {'Content-Type': 'application/json'}
+            except:
+                pass
+    return json.dumps({}), 200
+
+@app.route('/api/keybinds', methods=['POST'])
+def save_keybinds():
+    config_dir = get_config_dir()
+    path = os.path.join(config_dir, "keybinds.json")
+    try:
+        data = request.json
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+        return "Saved", 200
+    except Exception as e:
+        return str(e), 500
 
 # Configuring/retrieving secret key
 config_dir = get_config_dir()

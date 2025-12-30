@@ -268,15 +268,16 @@ function App() {
                             </div>
 
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                {activeTab === 'macros' ? (
+                                <div style={{ display: activeTab === 'macros' ? 'block' : 'none' }}>
                                     <MacroControls 
                                         controllerIndex={selectedController} 
                                         input={currentController.direct_input}
                                         controllerState={currentController}
                                     />
-                                ) : (
+                                </div>
+                                <div style={{ display: activeTab === 'bindings' ? 'block' : 'none' }}>
                                     <KeyBindings />
-                                )}
+                                </div>
                             </div>
                         </div>
                     </div>

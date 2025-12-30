@@ -48,3 +48,12 @@ export interface StickState {
 }
 
 export type AppState = Record<string, ControllerState>;
+
+export interface KeyMap {
+  keyboard: Record<string, string>; // Action -> Key Code
+  gamepad: {
+      buttons: Record<string, number>; // Action -> Button Index
+      axes: Record<string, { index: number, direction: 1 | -1 }>; // Action -> Axis Index & Dir
+  }
+}
+
