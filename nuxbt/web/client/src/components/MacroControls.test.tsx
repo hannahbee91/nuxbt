@@ -68,7 +68,7 @@ describe('MacroControls', () => {
         controllerState={mockControllerState} 
       />
     )
-    expect(screen.getByText(/Macro Editor/i)).toBeInTheDocument()
+    expect(screen.getByText(/Macro Name/i)).toBeInTheDocument()
     expect(screen.getByText(/Record/i)).toBeInTheDocument()
   })
 })
