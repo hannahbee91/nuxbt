@@ -410,7 +410,11 @@ class InputParser():
                     for k in range(len(hold_buffer)):
                         hold_buffer[k] = held_input + " " + hold_buffer[k]
                     
+                    # Insert setup frame
+                    parsed.append(f"{held_input} 0.05s")
                     parsed.extend(hold_buffer)
+                    # Insert cooldown frame
+                    parsed.append(f"{held_input} 0.05s")
             else:
                 parsed.append(line)
             i += 1

@@ -107,22 +107,18 @@ def test_macro_recording(page, web_server, mock_backend):
     # App.tsx: <button>Macros</button>
     page.click("button:has-text('Macros')")
     
-    # Wait for MacroControls to be visible (e.g. "Macro Editor" header)
-    page.wait_for_selector("text=Macro Editor")
+    # Wait for MacroControls to be visible
+    # We look for the "Macro Name" label or input
+    page.wait_for_selector("text=Macro Name")
     
     # Test Recording
     # Click "Record" button.
-    # MacroControls.tsx: button with text "Record"
     page.click("button:has-text('Record')")
     
     # Status should show REC indicator
-    # MacroControls.tsx: span with text "REC"
     page.wait_for_selector("text=REC")
     
     # Simulate button press
-    # Using keyboard 'L' -> 'A' button as per previous understanding 
-    # (assuming mapping is preserved or standard keyboard mapping is used)
-    # ControllerVisual.tsx: keys.has('L') -> packet.A = true
     page.keyboard.down('L')
     time.sleep(0.1)
     page.keyboard.up('L')
@@ -131,17 +127,27 @@ def test_macro_recording(page, web_server, mock_backend):
     time.sleep(0.5)
     
     # Stop Recording
-    # Button text changes to "Stop Rec"
     page.click("button:has-text('Stop Rec')")
     
     # Check Macro Text Area
-    # textarea in MacroControls
-    macro_text = page.input_value("textarea")
+    macro_text_before = page.input_value("textarea")
     
     # Verify content
-    # Should contain "A" and timings
-    assert "A" in macro_text
-    assert "s" in macro_text
+    assert "A" in macro_text_before
+    assert "s" in macro_text_before
+    
+    # Test Persistence: Switch tabs then back
+    # Click Key Bindings
+    page.click("button:has-text('Key Bindings')")
+    time.sleep(0.5)
+    # Click Macros
+    page.click("button:has-text('Macros')")
+    time.sleep(0.5)
+    
+    # Check Text Area again
+    macro_text_after = page.input_value("textarea")
+    assert macro_text_after == macro_text_before
+
     
     # Test Playback
     # Click "Run" button

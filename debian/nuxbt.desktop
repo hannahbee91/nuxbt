@@ -2,7 +2,7 @@
 Name=NUXBT
 Comment=Nintendo Switch Controller Tool
 Exec=nuxbt gui
-Icon=nuxbt
+Icon=nuxbt-logo
 Terminal=false
 Type=Application
 Categories=Utility;
