@@ -150,21 +150,25 @@ class NuxbtGUI(QMainWindow):
         self.update_status()
 
     def find_logo(self):
+        # Determine absolute path to this file
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
         # Check common paths
         candidates = [
             "docs/img/nuxbt-logo.png", # Dev relative
-            "/usr/share/icons/hicolor/512x512/apps/nuxbt.png", # Installed
-            os.path.join(os.path.dirname(__file__), "../docs/img/nuxbt-logo.png"), # Relative to file
+            "/usr/share/icons/hicolor/512x512/apps/nuxbt.png", # Installed (NFPM)
+            "/usr/share/pixmaps/nuxbt-logo.png", # Installed (PPA/Debian)
+            os.path.join(current_dir, "../docs/img/nuxbt-logo.png"), # Relative to file
             "/usr/lib/nuxbt/docs/img/nuxbt-logo.png" # Nfpm current copy?
         ]
         
-        # If running from source, find relative to package
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # If running from source, find relative to package root
+        base_dir = os.path.dirname(current_dir)
         candidates.append(os.path.join(base_dir, "docs/img/nuxbt-logo.png"))
 
         for path in candidates:
             if os.path.exists(path):
-                return path
+                return os.path.abspath(path)
         return None
 
     def update_status(self):
