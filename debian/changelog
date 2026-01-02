@@ -1,3 +1,14 @@
+nuxbt (3.1.2-1) noble; urgency=medium
+
+  * New release 3.1.2
+  * ### Bug Fixes
+  * **gui**: Fixed logo path detection in certain builds
+  *
+    ([`92e3f52`](https://github.com/hannahbee91/nuxbt/commit/92e3f525ff9
+    d666c70335b35ce42d617354bde5a))
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Fri, 02 Jan 2026 05:58:14 +0000
+
 nuxbt (3.1.1-1) noble; urgency=medium
 
   * New release 3.1.1
