@@ -57,7 +57,7 @@ def check_cli(name, cli_string, msg=None):
             print(msg)
         exit(1)
 
-INSTALL_SCRIPT = """sudo add-apt-repository ppa:hannahis/nuxbt && sudo apt update && sudo apt install nuxbt"""
+INSTALL_SCRIPT = """sudo add-apt-repository ppa:hannahbee-0602/nuxbt -y && sudo apt update && sudo apt full-upgrade -yqq && sudo apt install nuxbt -yqq"""
 
 if __name__ == "__main__":
     print("Checking for the required utilities...")

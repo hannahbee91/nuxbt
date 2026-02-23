@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/ubuntu2404"
+  config.vm.box = "bento/ubuntu-24.04"
 
   # Publically forwarded ports.
   # The below ports are accessible to all machines on the same network.
