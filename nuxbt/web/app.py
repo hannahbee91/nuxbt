@@ -6,13 +6,14 @@ from socket import gethostname
 
 from .cert import generate_cert
 from ..nuxbt import Nuxbt, PRO_CONTROLLER
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, request, jsonify
 from a2wsgi import WSGIMiddleware
 import uvicorn
-import socketio
 import pathlib
 import pwd
+import asyncio
+import threading
+from aiortc import RTCPeerConnection, RTCSessionDescription
 
 
 app = Flask(__name__,
@@ -229,12 +230,134 @@ else:
         secret_key = f.read()
 app.config['SECRET_KEY'] = secret_key
 
-# Starting socket server with Flask app
-# Ensure async_mode is threading for uvicorn/standard WSGI compatibility without eventlet
-# Note: This limits SocketIO to long-polling when running under uvicorn + a2wsgi/WSGIMiddleware
-# unless a2wsgi handles websocket translation (which it does for uWSGI but maybe not generic).
-sio = SocketIO(app, cookie=False, async_mode='threading', cors_allowed_origins='*')
+# WebRTC Management
+pcs = set()
+data_channels = set()
 
+def run_async(coro):
+    loop = asyncio.new_event_loop()
+    threading.Thread(target=loop.run_forever, daemon=True).start()
+    return asyncio.run_coroutine_threadsafe(coro, loop)
+
+# We need a shared loop for aiortc to manage connections
+webrtc_loop = asyncio.new_event_loop()
+def start_webrtc_loop():
+    asyncio.set_event_loop(webrtc_loop)
+    webrtc_loop.run_forever()
+threading.Thread(target=start_webrtc_loop, daemon=True).start()
+
+async def broadcast_state():
+    while True:
+        if nuxbt:
+            state_proxy = nuxbt.state.copy()
+            state = {}
+            for controller in state_proxy.keys():
+                state[controller] = state_proxy[controller].copy()
+            
+            message = json.dumps({"type": "state", "data": state})
+            for channel in list(data_channels):
+                if channel.readyState == "open":
+                    channel.send(message)
+        await asyncio.sleep(0.1)
+
+asyncio.run_coroutine_threadsafe(broadcast_state(), webrtc_loop)
+
+@app.route('/offer', methods=['POST'])
+def offer():
+    params = request.json
+    offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
+
+    pc = RTCPeerConnection()
+    pcs.add(pc)
+
+    @pc.on("datachannel")
+    def on_datachannel(channel):
+        data_channels.add(channel)
+        
+        @channel.on("message")
+        def on_message(message):
+            # print(f"Received message: {message[:100]}...")
+            if isinstance(message, str):
+                try:
+                    data = json.loads(message)
+                except Exception as e:
+                    print(f"Error parsing message: {e}")
+                    return
+
+                msg_type = data.get("type")
+                msg_data = data.get("data")
+                msg_id = data.get("id")
+
+                # Robustness: sometimes data might be double-stringified from frontend
+                if isinstance(msg_data, str) and (msg_data.startswith("[") or msg_data.startswith("{")):
+                    try:
+                        msg_data = json.loads(msg_data)
+                    except:
+                        pass
+
+                if msg_type == "input":
+                    packet = msg_data
+                    if isinstance(packet, list) and len(packet) == 2:
+                        index = packet[0]
+                        input_packet = packet[1]
+                        nuxbt.set_controller_input(index, input_packet)
+                
+                elif msg_type == "macro":
+                    if isinstance(msg_data, list) and len(msg_data) == 2:
+                        index = msg_data[0]
+                        macro = msg_data[1]
+                        macro_id = nuxbt.macro(index, macro, block=False)
+                        # Send response back
+                        channel.send(json.dumps({
+                            "type": "response",
+                            "id": msg_id,
+                            "data": macro_id
+                        }))
+                
+                elif msg_type == "stop_all_macros":
+                    if nuxbt:
+                        nuxbt.clear_all_macros()
+                
+                elif msg_type == "shutdown":
+                    nuxbt.remove_controller(msg_data)
+                
+                elif msg_type == "create_pro_controller":
+                    try:
+                        reconnect_addresses = nuxbt.get_switch_addresses()
+                        index = nuxbt.create_controller(PRO_CONTROLLER, reconnect_address=reconnect_addresses)
+                        channel.send(json.dumps({
+                            "type": "create_pro_controller",
+                            "data": index
+                        }))
+                    except Exception as e:
+                        channel.send(json.dumps({
+                            "type": "error",
+                            "data": str(e)
+                        }))
+
+        @channel.on("close")
+        def on_close():
+            data_channels.discard(channel)
+
+    @pc.on("connectionstatechange")
+    async def on_connectionstatechange():
+        if pc.connectionState == "failed" or pc.connectionState == "closed":
+            await pc.close()
+            pcs.discard(pc)
+
+    async def setup_offer():
+        await pc.setRemoteDescription(offer)
+        answer = await pc.createAnswer()
+        await pc.setLocalDescription(answer)
+        return {
+            "sdp": pc.localDescription.sdp,
+            "type": pc.localDescription.type
+        }
+
+    future = asyncio.run_coroutine_threadsafe(setup_offer(), webrtc_loop)
+    return jsonify(future.result())
+
+# Starting socket server with Flask app
 # Wrap Flask app with WSGIMiddleware to allow running with uvicorn (ASGI)
 # This middleware bridges ASGI -> WSGI
 flask_asgi = WSGIMiddleware(app)
@@ -249,76 +372,7 @@ def index():
     return render_template('index.html')
 
 
-@sio.on('connect')
-def on_connect():
-    with user_info_lock:
-        USER_INFO[request.sid] = {}
-
-
-@sio.on('state')
-def on_state():
-    state_proxy = nuxbt.state.copy()
-    state = {}
-    for controller in state_proxy.keys():
-        state[controller] = state_proxy[controller].copy()
-    emit('state', state)
-
-
-@sio.on('disconnect')
-def on_disconnect():
-    print("Disconnected")
-    with user_info_lock:
-        try:
-            index = USER_INFO[request.sid]["controller_index"]
-            nuxbt.remove_controller(index)
-        except KeyError:
-            pass
-
-
-@sio.on('shutdown')
-def on_shutdown(index):
-    nuxbt.remove_controller(index)
-
-
-@sio.on('web_create_pro_controller')
-def on_create_controller():
-    print("Create Controller")
-
-    try:
-        reconnect_addresses = nuxbt.get_switch_addresses()
-        index = nuxbt.create_controller(PRO_CONTROLLER, reconnect_address=reconnect_addresses)
-
-        with user_info_lock:
-            USER_INFO[request.sid]["controller_index"] = index
-
-        emit('create_pro_controller', index)
-    except Exception as e:
-        emit('error', str(e))
-
-
-@sio.on('input')
-def handle_input(message):
-    # print("Webapp Input", time.perf_counter())
-    message = json.loads(message)
-    index = message[0]
-    input_packet = message[1]
-    nuxbt.set_controller_input(index, input_packet)
-
-
-@sio.on('macro')
-def handle_macro(message):
-    message = json.loads(message)
-    index = message[0]
-    macro = message[1]
-    macro_id = nuxbt.macro(index, macro, block=False)
-    return macro_id
-
-
-
-@sio.on('stop_all_macros')
-def handle_stop_all_macros():
-    if nuxbt:
-        nuxbt.clear_all_macros()
+# Removed SocketIO handlers as they are replaced by WebRTC DataChannel handlers
 
 
 

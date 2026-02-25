@@ -34,7 +34,6 @@ function App() {
 
     function onError(err: string) {
       setError(err);
-      // Removed timeout, user wants persistent pop-up until closed
     }
 
     socket.on('state', onState);
@@ -47,24 +46,17 @@ function App() {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handlePromiseError);
 
-    const pollInterval = setInterval(() => {
-        if (socket.connected) {
-            socket.emit('state');
-        }
-    }, 100);
-
     return () => {
       socket.off('state', onState);
       socket.off('error', onError);
       socket.off('create_pro_controller', onControllerCreated);
       window.removeEventListener('error', handleGlobalError);
       window.removeEventListener('unhandledrejection', handlePromiseError);
-      clearInterval(pollInterval);
     };
   }, []);
 
   const createController = () => {
-    socket.emit('web_create_pro_controller');
+    socket.emit('create_pro_controller');
   };
 
   const removeController = (index: string) => {
