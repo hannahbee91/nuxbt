@@ -70,7 +70,7 @@ def web_server(mock_backend):
     
     def run_server():
         try:
-            uvicorn.run(app.app_asgi, host="127.0.0.1", port=port, log_level="info")
+            uvicorn.run(app.app_asgi, host="127.0.0.1", port=port, log_level="critical", ws='wsproto')
         except Exception as e:
             import traceback
             traceback.print_exc()

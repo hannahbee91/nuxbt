@@ -176,7 +176,7 @@ export function MacroControls({ controllerIndex, input, controllerState }: Props
 
   const emitMacro = () => {
       if (!macroText.trim()) return;
-      socket.emit('macro', [parseInt(controllerIndex), macroText.toUpperCase()], (response: string) => {
+      socket.emit('macro', JSON.stringify([parseInt(controllerIndex), macroText.toUpperCase()]), (response: string) => {
           setRunningMacroId(response);
       });
   };

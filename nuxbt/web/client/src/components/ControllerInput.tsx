@@ -51,7 +51,7 @@ export const ControllerInput: React.FC<Props> = ({ index }) => {
     // Only update if changed (deep compare simplified)
     if (JSON.stringify(newInput) !== JSON.stringify(inputRef.current)) {
         setInput(newInput);
-        socket.emit('input', [parseInt(index), newInput]);
+        socket.emit('input', JSON.stringify([parseInt(index), newInput]));
     }
   };
 
