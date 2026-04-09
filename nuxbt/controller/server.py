@@ -160,9 +160,15 @@ class ControllerServer():
                 self.logger.debug(format_msg_controller(msg))
 
             try:
-                # Cache the last packet to prevent overloading the switch
-                # with packets on the "Change Grip/Order" menu.
-                if msg[3:] != self.cached_msg:
+                # When active input is queued (buttons held/macro running),
+                # always send so the Switch sees continuous reports and
+                # a single lost BT packet doesn't drop the input.
+                if self.input.active_input_queued():
+                    itr.sendall(msg)
+                    self.cached_msg = msg[3:]
+                # If nothing is pressed, just send the message once and cache it
+                # to prevent overloading the switch with packets on the "Change Grip/Order" menu. 
+                elif msg[3:] != self.cached_msg:
                     itr.sendall(msg)
                     self.cached_msg = msg[3:]
                 # Send a blank packet every so often to keep the Switch
