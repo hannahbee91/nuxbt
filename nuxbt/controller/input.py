@@ -132,6 +132,10 @@ class InputParser():
         if state:
             finished = state["finished_macros"]
             finished.append(macro_id)
+            # Prune to prevent unbounded growth - the caller only
+            # checks for a single macro_id, so keep the last few.
+            if len(finished) > 20:
+                finished = finished[-5:]
             state["finished_macros"] = finished
 
         return
