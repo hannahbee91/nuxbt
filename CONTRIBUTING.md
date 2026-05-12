@@ -21,7 +21,12 @@ This project and everyone participating in it is governed by the [Code of Conduc
 
 If you have questions, please search the open Issues to see if your question has already been answered. If not, feel free to open a new Issue with the "question" label.
 
+
 ## I Want To Contribute
+
+### Supported Ubuntu Releases
+
+Packaging and release automation supports both Ubuntu Noble (24.04) and Resolute (26.04) via the PPA and source packages. If you are contributing packaging or release changes, please ensure both distributions are handled.
 
 ### Reporting Bugs
 

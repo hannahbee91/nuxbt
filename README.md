@@ -48,9 +48,9 @@
 
 ### Linux (DEB/RPM - Recommended)
 
-## Ubuntu PPA
+## Ubuntu PPA (Noble & Resolute)
 
-1. Add the PPA to your system:
+1. Add the PPA to your system (supported: Ubuntu Noble 24.04 and Resolute 26.04):
 ```bash
 sudo add-apt-repository ppa:hannahbee-0602/nuxbt
 sudo apt update

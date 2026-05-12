@@ -44,6 +44,15 @@ if ! grep -q "($VERSION" debian/changelog; then
     dch -v "$VERSION-1" "New release $VERSION"
 fi
 
+# Use DISTRO env var if set, otherwise default to noble
+DISTRO=${DISTRO:-noble}
+
+# Create debian/changelog entry for this distro if missing
+if ! grep -q "($VERSION-1) $DISTRO;" debian/changelog; then
+    echo "Updating changelog to $VERSION-1 ($DISTRO)"
+    dch -v "$VERSION-1" --distribution $DISTRO "New release $VERSION"
+fi
+
 # Build source package
 # -S: source only
 # -sa: include original source
@@ -53,10 +62,12 @@ if [ -n "$GPG_KEY_ID" ]; then
 fi
 # Create orig tarball
 # We need to include the vendored wheels in the tarball so they are available for the build
-tar --exclude='./debian' --exclude='./.git' --exclude='./dist_ppa' --exclude='./dist' -czf "../nuxbt_$VERSION.orig.tar.gz" .
+TARBALL="../nuxbt_${VERSION}_${DISTRO}.orig.tar.gz"
+tar --exclude='./debian' --exclude='./.git' --exclude='./dist_ppa' --exclude='./dist' -czf "$TARBALL" .
 
 # -d: do not check build dependencies (dh-virtualenv might be missing locally)
 echo "Building source package for version $VERSION..."
-debuild -S -sa -k"$GPG_KEY_ID" -d
+echo "Building source package for version $VERSION ($DISTRO)..."
+debuild -S -sa -k"$GPG_KEY_ID" -d --changes-option=-DDistribution=$DISTRO
 
 echo "Source package built in parent directory."

@@ -135,24 +135,21 @@ jobs:
           # Ensure we have a clean state for the changelog
           # Update changelog to match release version if needed
           # Ensure we have a clean state for the changelog
-          if ! grep -q "($VERSION-1)" debian/changelog; then
-             dch -v "$VERSION-1" --distribution noble "New release $VERSION"
-             
-             # Extract changes from CHANGELOG.md and append them
-             awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | sed 's/^[-*] //g' | while IFS= read -r line; do
+          for DISTRO in noble resolute; do
+            if ! grep -q "($VERSION-1)" debian/changelog || ! grep -q "$DISTRO;" debian/changelog; then
+              dch -v "$VERSION-1" --distribution $DISTRO "New release $VERSION"
+              # Extract changes from CHANGELOG.md and append them
+              awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | sed 's/^[-*] //g' | while IFS= read -r line; do
                 dch -a "$line"
-             done
-
-             # Commit the changelog change so it's included in the source
-             git config --global user.email "bot@nuxbt.com"
-             git config --global user.name "Nuxbt Bot"
-             git commit -am "Update changelog for $VERSION [skip ci]"
-             git push origin HEAD:main
-          fi
-
-           # Vendor dependencies and build source package using the script
-           # This ensures consistency with local builds and uses poetry export
-           ./scripts/build_ppa_source.sh
-          
-           # Upload to PPA
-           dput my-ppa ../nuxbt_*_source.changes
+              done
+              # Commit the changelog change so it's included in the source
+              git config --global user.email "bot@nuxbt.com"
+              git config --global user.name "Nuxbt Bot"
+              git commit -am "Update changelog for $VERSION ($DISTRO) [skip ci]" || true
+              git push origin HEAD:main || true
+            fi
+            # Vendor dependencies and build source package using the script
+            DISTRO=$DISTRO ./scripts/build_ppa_source.sh
+            # Upload to PPA
+            dput my-ppa ../nuxbt_*${DISTRO}*_source.changes
+          done
