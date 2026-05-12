@@ -37,37 +37,37 @@ rm -f wheels/PyGObject* wheels/dbus-python* wheels/pycairo* wheels/evdev*
 # Get version from pyproject.toml
 VERSION=$(grep "^version =" pyproject.toml | cut -d '"' -f 2)
 
-# Create debian/changelog if it doesn't match
-# Note: This is a simple check, in CI we might force update it.
-if ! grep -q "($VERSION" debian/changelog; then
-    echo "Updating changelog to $VERSION-1"
-    dch -v "$VERSION-1" "New release $VERSION"
-fi
-
 # Use DISTRO env var if set, otherwise default to noble
 DISTRO=${DISTRO:-noble}
 
+# Use per-distro version suffix so each distro gets a unique .changes file
+# e.g. 3.3.0-1~noble1 and 3.3.0-1~resolute1
+DEBVERSION="${VERSION}-1~${DISTRO}1"
+
 # Create debian/changelog entry for this distro if missing
-if ! grep -q "($VERSION-1) $DISTRO;" debian/changelog; then
-    echo "Updating changelog to $VERSION-1 ($DISTRO)"
-    dch -v "$VERSION-1" --distribution $DISTRO "New release $VERSION"
+if ! grep -q "($DEBVERSION)" debian/changelog; then
+    echo "Updating changelog to $DEBVERSION ($DISTRO)"
+    dch -v "$DEBVERSION" --distribution $DISTRO "New release $VERSION"
 fi
 
 # Build source package
 # -S: source only
-# -sa: include original source
 # Export DEBSIGN_KEYID to force debsign to use it, avoiding maintainer lookup
 if [ -n "$GPG_KEY_ID" ]; then
     export DEBSIGN_KEYID="$GPG_KEY_ID"
 fi
-# Create orig tarball
-# We need to include the vendored wheels in the tarball so they are available for the build
-TARBALL="../nuxbt_${VERSION}_${DISTRO}.orig.tar.gz"
-tar --exclude='./debian' --exclude='./.git' --exclude='./dist_ppa' --exclude='./dist' -czf "$TARBALL" .
+# Create orig tarball using the standard naming convention (shared across distros)
+# Use -sa if the tarball doesn't yet exist, -sd if it does (avoids re-uploading)
+TARBALL="../nuxbt_${VERSION}.orig.tar.gz"
+if [ ! -f "$TARBALL" ]; then
+    tar --exclude='./debian' --exclude='./.git' --exclude='./dist_ppa' --exclude='./dist' -czf "$TARBALL" .
+    DEBUILD_ORIG_FLAG="-sa"
+else
+    DEBUILD_ORIG_FLAG="-sd"
+fi
 
 # -d: do not check build dependencies (dh-virtualenv might be missing locally)
-echo "Building source package for version $VERSION..."
 echo "Building source package for version $VERSION ($DISTRO)..."
-debuild -S -sa -k"$GPG_KEY_ID" -d --changes-option=-DDistribution=$DISTRO
+debuild -S $DEBUILD_ORIG_FLAG -k"$GPG_KEY_ID" -d
 
-echo "Source package built in parent directory."
+echo "Source package for $DISTRO built in parent directory."

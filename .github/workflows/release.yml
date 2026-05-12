@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install system dependencies
         run: |
@@ -35,8 +35,8 @@ jobs:
 
       - name: Install Poetry
         run: |
-            pip install poetry
-            poetry self add poetry-plugin-export
+          pip install poetry
+          poetry self add poetry-plugin-export
 
       - name: Install project dependencies
         run: poetry install --sync --no-interaction
@@ -44,9 +44,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: './nuxbt/web/client/package-lock.json'
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: "./nuxbt/web/client/package-lock.json"
 
       - name: Build Frontend
         working-directory: ./nuxbt/web/client
@@ -68,20 +68,20 @@ jobs:
         run: |
           # Create the directory structure mimicking the target
           mkdir -p dist/usr/lib/nuxbt
-          
+
           # Create venv in the temporary location
           python3 -m venv dist/usr/lib/nuxbt
 
           # Export requirements to ensure we get locked versions
           poetry export --without-hashes --format=requirements.txt > requirements.txt
-          
+
           # Install the package and dependencies into the venv
           source dist/usr/lib/nuxbt/bin/activate
           # Install dependencies first from the locked requirements
           pip install -r requirements.txt
           # Then install the package itself
           pip install dist/*.whl
-          
+
           # Fix shebangs to point to the target location /usr/lib/nuxbt
           # This ensures that when installed, they look for python in the right place
           sed -i 's|#!'"$PWD"'/dist/usr/lib/nuxbt|#!/usr/lib/nuxbt|g' dist/usr/lib/nuxbt/bin/*
@@ -122,7 +122,7 @@ jobs:
         run: |
           export VERSION=${{ github.event.release.tag_name }}
           export VERSION=${VERSION#v}
-          
+
           # Configure dput (using a simple config for Launchpad)
           echo "[my-ppa]" > ~/.dput.cf
           echo "fqdn = ppa.launchpad.net" >> ~/.dput.cf
@@ -130,26 +130,27 @@ jobs:
           echo "incoming = ~hannahbee-0602/ubuntu/nuxbt/" >> ~/.dput.cf
           echo "login = anonymous" >> ~/.dput.cf
           echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
-          
-          # Update changelog to match release version if needed
-          # Ensure we have a clean state for the changelog
-          # Update changelog to match release version if needed
-          # Ensure we have a clean state for the changelog
+
+          git config --global user.email "bot@nuxbt.com"
+          git config --global user.name "Nuxbt Bot"
+
           for DISTRO in noble resolute; do
-            if ! grep -q "($VERSION-1)" debian/changelog || ! grep -q "$DISTRO;" debian/changelog; then
-              dch -v "$VERSION-1" --distribution $DISTRO "New release $VERSION"
-              # Extract changes from CHANGELOG.md and append them
+            DEBVERSION="${VERSION}-1~${DISTRO}1"
+
+            # Update changelog if needed, then commit so it's included in the source package
+            if ! grep -q "($DEBVERSION)" debian/changelog; then
+              dch -v "$DEBVERSION" --distribution $DISTRO "New release $VERSION"
+              # Append per-entry changes from CHANGELOG.md
               awk "/^## v$VERSION/{flag=1; next} /^## v/{flag=0} flag" CHANGELOG.md | sed '/^$/d' | sed 's/^[-*] //g' | while IFS= read -r line; do
                 dch -a "$line"
               done
-              # Commit the changelog change so it's included in the source
-              git config --global user.email "bot@nuxbt.com"
-              git config --global user.name "Nuxbt Bot"
-              git commit -am "Update changelog for $VERSION ($DISTRO) [skip ci]" || true
+              git commit -am "Update changelog for $DEBVERSION [skip ci]" || true
               git push origin HEAD:main || true
             fi
-            # Vendor dependencies and build source package using the script
+
+            # Build source package for this distro
             DISTRO=$DISTRO ./scripts/build_ppa_source.sh
-            # Upload to PPA
-            dput my-ppa ../nuxbt_*${DISTRO}*_source.changes
+
+            # Upload to PPA (.changes file is named after the per-distro version)
+            dput my-ppa "../nuxbt_${DEBVERSION}_source.changes"
           done
