@@ -166,11 +166,13 @@ class ControllerServer():
                 if self.input.active_input_queued():
                     itr.sendall(msg)
                     self.cached_msg = msg[3:]
+                    self.tick = 0
                 # If nothing is pressed, just send the message once and cache it
                 # to prevent overloading the switch with packets on the "Change Grip/Order" menu. 
                 elif msg[3:] != self.cached_msg:
                     itr.sendall(msg)
                     self.cached_msg = msg[3:]
+                    self.tick = 0
                 # Send a blank packet every so often to keep the Switch
                 # from disconnecting from the controller.
                 elif self.tick >= 132:
