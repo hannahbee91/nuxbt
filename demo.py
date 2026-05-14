@@ -12,6 +12,8 @@ LOOP 12
 1.5s
 DPAD_RIGHT 0.075s
 0.075s
+DPAD_RIGHT 0.075s
+0.075s
 A 0.1s
 1.5s
 DPAD_DOWN 1.00s
@@ -39,6 +41,8 @@ LOOP 4
     0.1s
 B 0.1s
 0.4s
+DPAD_LEFT 0.1s
+0.1s
 DPAD_LEFT 0.1s
 0.1s
 A 0.1s
