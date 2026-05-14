@@ -57,17 +57,17 @@ if [ -n "$GPG_KEY_ID" ]; then
     export DEBSIGN_KEYID="$GPG_KEY_ID"
 fi
 # Create orig tarball using the standard naming convention (shared across distros)
-# Use -sa if the tarball doesn't yet exist, -sd if it does (avoids re-uploading)
+# Always use -sa so the orig tarball is included in every upload — Launchpad
+# accepts duplicate uploads of the same tarball (matched by checksum) and this
+# avoids a race where a later distro upload arrives before Launchpad has
+# processed the first one and associated the orig.
 TARBALL="../nuxbt_${VERSION}.orig.tar.gz"
 if [ ! -f "$TARBALL" ]; then
     tar --exclude='./debian' --exclude='./.git' --exclude='./dist_ppa' --exclude='./dist' -czf "$TARBALL" .
-    DEBUILD_ORIG_FLAG="-sa"
-else
-    DEBUILD_ORIG_FLAG="-sd"
 fi
 
 # -d: do not check build dependencies (dh-virtualenv might be missing locally)
 echo "Building source package for version $VERSION ($DISTRO)..."
-debuild -S $DEBUILD_ORIG_FLAG -k"$GPG_KEY_ID" -d
+debuild -S -sa -k"$GPG_KEY_ID" -d
 
 echo "Source package for $DISTRO built in parent directory."
