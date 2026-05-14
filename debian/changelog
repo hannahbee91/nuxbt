@@ -1,3 +1,19 @@
+nuxbt (3.3.2-1~noble1) noble; urgency=medium
+
+  * New release 3.3.2
+  * ### Bug Fixes
+  * Sending non-blank packages resets the tick counter
+  *   ([#60](https://github.com/hannahbee91/nuxbt/pull/60),
+  *
+    [`39ffff4`](https://github.com/hannahbee91/nuxbt/commit/39ffff46b60d
+    5e0402def31d8ec8f5d7747407a1))
+  * This fixes the program of always sending blank packets every 132
+    ticks, even if there has been user
+  *   input. In my testing, this improves input stability, especially on
+    very fast input macros.
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Thu, 14 May 2026 04:06:24 +0000
+
 nuxbt (3.3.1-1~resolute1) resolute; urgency=medium
 
   * New release 3.3.1

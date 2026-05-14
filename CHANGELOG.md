@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v3.3.2 (2026-05-14)
+
+### Bug Fixes
+
+- Sending non-blank packages resets the tick counter
+  ([#60](https://github.com/hannahbee91/nuxbt/pull/60),
+  [`39ffff4`](https://github.com/hannahbee91/nuxbt/commit/39ffff46b60d5e0402def31d8ec8f5d7747407a1))
+
+This fixes the program of always sending blank packets every 132 ticks, even if there has been user
+  input. In my testing, this improves input stability, especially on very fast input macros.
+
+
 ## v3.3.1 (2026-05-12)
 
 ### Bug Fixes
