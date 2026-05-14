@@ -1,3 +1,4 @@
+import multiprocessing
 from multiprocessing import Process, Lock, Queue, Manager
 import queue
 from enum import Enum
@@ -9,6 +10,17 @@ import time
 import json
 import logging
 import subprocess
+
+# Python 3.14 changed the default start method from 'fork' to 'forkserver'
+# on Linux. The forkserver method requires all process targets and arguments
+# to be picklable, but this codebase relies on fork semantics (bound methods
+# as process targets, unpicklable dbus/socket objects in shared state, etc.).
+# Explicitly requesting 'fork' restores the prior behavior and is backward
+# compatible with Python 3.11+.
+try:
+    multiprocessing.set_start_method('fork')
+except RuntimeError:
+    pass  # Already set (e.g. frozen/embedded environments)
 
 import dbus
 

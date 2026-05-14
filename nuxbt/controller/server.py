@@ -516,4 +516,4 @@ class ControllerServer():
         return itr, ctrl
 
     def _on_exit(self):
-        self.bt.reset_address()
+        self.bt.reset_adapter()
