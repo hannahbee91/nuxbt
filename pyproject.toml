@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nuxbt"
-version = "3.3.2"
+version = "3.3.3"
 description = "Control your Nintendo Switch through a website, terminal, or macro."
 authors = ["Hannah Brown <hannah@hannahis.gay>"]
 license = "MIT"
@@ -66,6 +66,7 @@ build_command = "pip install poetry && poetry build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = ["error"]
+
 
 
 

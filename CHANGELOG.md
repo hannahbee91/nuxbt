@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v3.3.3 (2026-05-14)
+
+### Bug Fixes
+
+- **build**: Always include original tarball ([#61](https://github.com/hannahbee91/nuxbt/pull/61),
+  [`71e9420`](https://github.com/hannahbee91/nuxbt/commit/71e94202c84e3b26bb458cd51cc371ca3379dbf2))
+
+- **build**: Fix resolute builds
+  ([`5107283`](https://github.com/hannahbee91/nuxbt/commit/5107283f103a67a16e92f7b1a930e3902125f8a8))
+
+
 ## v3.3.2 (2026-05-14)
 
 ### Bug Fixes
