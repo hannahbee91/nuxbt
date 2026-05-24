@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { socket } from './socket';
-import type { AppState } from './types';
+import type { AppState, KeyMap } from './types';
+import { DEFAULT_KEYBINDS } from './defaults';
 import { Plus, Gamepad2, AlertCircle, ArrowLeft, X } from 'lucide-react';
 import { ControllerVisual } from './components/ControllerVisual';
 import { ThemeToggle } from './components/ThemeToggle';
 import { MacroControls } from './components/MacroControls';
 import { KeyBindings } from './components/KeyBindings';
 
+
 function App() {
   const [controllers, setControllers] = useState<AppState>({});
   const [error, setError] = useState<string | null>(null);
   const [selectedController, setSelectedController] = useState<string | null>(null);
+  const [keyMap, setKeyMap] = useState<KeyMap>(DEFAULT_KEYBINDS);
+
   const [activeTab, setActiveTab] = useState<'macros' | 'bindings'>(() => {
     if (typeof window !== 'undefined') {
         const saved = localStorage.getItem('activeTab');
@@ -62,6 +66,18 @@ function App() {
       clearInterval(pollInterval);
     };
   }, []);
+
+  useEffect(() => {
+    fetch('/api/keybinds')
+      .then(res => res.json())
+      .then(data => {
+          if (data && data.keyboard) {
+              setKeyMap(data);
+          }
+      })
+      .catch(err => console.error("Failed to load keybinds in App", err));
+  }, []);
+
 
   const createController = () => {
     socket.emit('web_create_pro_controller');
@@ -237,6 +253,7 @@ function App() {
                                         setInput={() => {
                                             // Optimistic update handled in Visual, logic here if needed
                                         }}
+                                        keyMap={keyMap}
                                     />
                                 </div>
                             </div>
@@ -276,7 +293,7 @@ function App() {
                                     />
                                 </div>
                                 <div style={{ display: activeTab === 'bindings' ? 'block' : 'none' }}>
-                                    <KeyBindings />
+                                    <KeyBindings initialKeyMap={keyMap} onSave={setKeyMap} />
                                 </div>
                             </div>
                         </div>

@@ -3,23 +3,21 @@ import { Keyboard, Gamepad2, Save, RefreshCw } from 'lucide-react';
 import type { KeyMap } from '../types';
 import { DEFAULT_KEYBINDS, ACTIONS } from '../defaults';
 
-export function KeyBindings() {
+interface Props {
+  initialKeyMap: KeyMap;
+  onSave: (newKeyMap: KeyMap) => void;
+}
+
+export function KeyBindings({ initialKeyMap, onSave }: Props) {
   const [activeSubTab, setActiveSubTab] = useState<'keyboard' | 'gamepad'>('keyboard');
-  const [keyMap, setKeyMap] = useState<KeyMap>(DEFAULT_KEYBINDS);
+  const [keyMap, setKeyMap] = useState<KeyMap>(initialKeyMap);
   const [editingAction, setEditingAction] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    fetch('/api/keybinds')
-      .then(res => res.json())
-      .then(data => {
-          if (data && data.keyboard) {
-              setKeyMap(data);
-          }
-      })
-      .catch(err => console.error(err));
-  }, []);
+    setKeyMap(initialKeyMap);
+  }, [initialKeyMap]);
 
   const save = async () => {
     try {
@@ -29,6 +27,7 @@ export function KeyBindings() {
             body: JSON.stringify(keyMap)
         });
         setHasChanges(false);
+        onSave(keyMap);
     } catch(e) {
         console.error("Failed to save", e);
     }
