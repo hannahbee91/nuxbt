@@ -253,10 +253,15 @@ class InputParser():
             upper[0] = '1'
 
         # Shared byte
+        # Switch HID shared button byte: bit 0 = Minus, bit 1 = Plus. Here the
+        # bit array is MSB-first (shared[7] is bit 0), so Minus -> shared[7] and
+        # Plus -> shared[6]. This matches the macro path (set_macro_input) and
+        # fixes a swap that previously made direct input report Plus as Minus
+        # and vice versa.
         if controller_input["MINUS"]:
-            shared[6] = '1'
-        if controller_input["PLUS"]:
             shared[7] = '1'
+        if controller_input["PLUS"]:
+            shared[6] = '1'
         if controller_input["R_STICK"]["PRESSED"]:
             shared[5] = '1'
         if controller_input["L_STICK"]["PRESSED"]:
