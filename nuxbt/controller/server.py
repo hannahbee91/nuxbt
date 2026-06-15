@@ -3,11 +3,11 @@ import fcntl
 import os
 import time
 import queue
+import select
 import logging
 import traceback
 import atexit
 from threading import Thread
-import statistics as stat
 
 from .controller import Controller, ControllerTypes
 from ..bluez import BlueZ, find_devices_by_alias
@@ -61,11 +61,6 @@ class ControllerServer():
 
         self.input = InputParser(self.protocol)
 
-        # Debug timekeeping storage array
-        self.times = []
-
-        # Initial reconnection overload protection
-        self.tick = 1
         self.cached_msg = ''
 
     def run(self, reconnect_address=None):
@@ -116,23 +111,48 @@ class ControllerServer():
                 self.logger.debug("Error during graceful shutdown:")
                 self.logger.debug(traceback.format_exc())
 
+    # While active input is held (button down/stick tilted/macro running)
+    # we resend at the Bluetooth interval so a single lost packet doesn't
+    # drop the input and so macro timing keeps advancing.
+    ACTIVE_INTERVAL = 1 / 132
+    # When idle, send a keepalive report every so often so the Switch
+    # doesn't drop the controller (replaces the old tick >= 132 counter).
+    KEEPALIVE_INTERVAL = 1.0
+
     def mainloop(self, itr, ctrl):
 
-        duration_start = time.perf_counter()
-        while True:
-            # Start timing command processing
-            timer_start = time.perf_counter()
+        # The interrupt socket plus the task queue's read end form the set of
+        # event sources. select() blocks until the Switch sends something, an
+        # input/macro event arrives, or the timeout fires, instead of polling
+        # shared state on a fixed timer.
+        if self.task_queue is not None:
+            queue_reader = self.task_queue._reader
+        else:
+            queue_reader = None
 
-            # Attempt to get output from Switch
+        while True:
+            # Hold/macro active -> wake at the BT interval to keep resending.
+            # Idle -> wake at the keepalive interval.
+            timeout = (self.ACTIVE_INTERVAL
+                       if self.input.active_input_queued()
+                       else self.KEEPALIVE_INTERVAL)
+
+            read_set = [itr] if queue_reader is None else [itr, queue_reader]
+            readable, _, _ = select.select(read_set, [], [], timeout)
+            timed_out = not readable
+
+            # Attempt to get output from Switch (itr stays non-blocking)
             try:
                 reply = itr.recv(50)
-                if len(reply) > 40:
+                if self.logger_level <= logging.DEBUG and len(reply) > 40:
                     self.logger.debug(format_msg_switch(reply))
             except BlockingIOError:
                 reply = None
 
-            # Getting any inputs from the task queue
-            if self.task_queue:
+            # Drain the task queue every loop. This is cheap when empty and
+            # avoids missed wakeups from the Queue's internal buffer being out
+            # of sync with the pipe that select() watches.
+            if self.task_queue is not None:
                 try:
                     while True:
                         msg = self.task_queue.get_nowait()
@@ -144,12 +164,10 @@ class ControllerServer():
                                 msg["macro_id"], state=self.state)
                         elif msg and msg["type"] == "clear":
                             self.input.clear_macros()
+                        elif msg and msg["type"] == "direct":
+                            self.input.set_controller_input(msg["input"])
                 except queue.Empty:
                     pass
-
-            # Set Direct Input
-            if self.state["direct_input"]:
-                self.input.set_controller_input(self.state["direct_input"])
 
             self.protocol.process_commands(reply)
             self.input.set_protocol_input(state=self.state)
@@ -166,42 +184,23 @@ class ControllerServer():
                 if self.input.active_input_queued():
                     itr.sendall(msg)
                     self.cached_msg = msg[3:]
-                    self.tick = 0
-                # If nothing is pressed, just send the message once and cache it
-                # to prevent overloading the switch with packets on the "Change Grip/Order" menu. 
+                # If the report changed (input change or a subcommand reply
+                # from the Switch), send it once and cache it to avoid
+                # flooding the Switch on the "Change Grip/Order" menu.
                 elif msg[3:] != self.cached_msg:
                     itr.sendall(msg)
                     self.cached_msg = msg[3:]
-                    self.tick = 0
-                # Send a blank packet every so often to keep the Switch
-                # from disconnecting from the controller.
-                elif self.tick >= 132:
+                # The Switch sent us something that needs a reply.
+                elif reply:
                     itr.sendall(msg)
-                    self.tick = 0
+                # Idle keepalive so the Switch doesn't drop the controller.
+                elif timed_out:
+                    itr.sendall(msg)
             except BlockingIOError:
                 continue
             except OSError as e:
                 # Attempt to reconnect to the Switch
                 itr, ctrl = self.save_connection(e)
-
-            # Figure out how long it took to process commands
-            duration_end = time.perf_counter()
-            duration_elapsed = duration_end - duration_start
-            duration_start = duration_end
-            
-            sleep_time = 1/132 - duration_elapsed
-            if sleep_time >= 0:
-                time.sleep(sleep_time)
-            self.tick += 1
-
-            if self.logger_level <= logging.DEBUG:
-                self.times.append(duration_elapsed)
-                if len(self.times) > 100:
-                    self.times.pop()
-                mean_time = stat.mean(self.times)
-
-                self.logger.debug(
-                    f"Tick: {self.tick}, Mean Time: {str(1/mean_time)}")
 
 
     def save_connection(self, error, state=None):
@@ -272,9 +271,6 @@ class ControllerServer():
         # to connect to any Switch.
         self.logger.debug("Connecting to any Switch")
         self.reconnect_counter = 0
-
-        # Reinitialize initial communication overload protections
-        self.tick = 1
 
         # Reinitialize the protocol
         self.protocol = ControllerProtocol(

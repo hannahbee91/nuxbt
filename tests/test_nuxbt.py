@@ -123,3 +123,27 @@ class TestNuxbt:
             macro_string = "A 0.1s"
             result_id = nuxbt_instance.macro(0, macro_string, block=True)
             assert result_id == macro_id_holder[0]
+
+    def test_set_controller_input(self, nuxbt_instance):
+        """Direct input is mirrored into state (for observers like the web UI)
+        and enqueued as a SET_INPUT event so the controller loop wakes
+        immediately instead of polling."""
+        nuxbt_instance.manager_state[0] = {}
+
+        packet = nuxbt_instance.create_input_packet()
+        packet["A"] = True
+        nuxbt_instance.set_controller_input(0, packet)
+
+        # Mirror for external observers
+        assert nuxbt_instance.manager_state[0]["direct_input"] == packet
+
+        # Event for the controller hot loop
+        msg = nuxbt_instance.task_queue.get(timeout=1)
+        assert msg["command"] == NuxbtCommands.SET_INPUT
+        assert msg["arguments"]["controller_index"] == 0
+        assert msg["arguments"]["input_packet"] == packet
+
+    def test_set_controller_input_unknown_index(self, nuxbt_instance):
+        """Setting input on a non-existent controller raises."""
+        with pytest.raises(ValueError, match="does not exist"):
+            nuxbt_instance.set_controller_input(99, {})
