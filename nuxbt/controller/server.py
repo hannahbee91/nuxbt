@@ -49,6 +49,10 @@ class ControllerServer():
 
         self.reconnect_counter = 0
 
+        self._crw_running = False
+        self._watchdog_connected_devices = []
+        self._watchdog_connected_devices_count = {}
+
         # Intializing Bluetooth
         self.bt = BlueZ(adapter_path=adapter_path)
 
@@ -110,6 +114,8 @@ class ControllerServer():
             except Exception as e:
                 self.logger.debug("Error during graceful shutdown:")
                 self.logger.debug(traceback.format_exc())
+        finally:
+            self._crw_running = False
 
     # While active input is held (button down/stick tilted/macro running)
     # we resend at the Bluetooth interval so a single lost packet doesn't
@@ -199,6 +205,13 @@ class ControllerServer():
             except BlockingIOError:
                 continue
             except OSError as e:
+                # The interrupt socket died; close the stale sockets before
+                # reconnecting so we don't leak them or hold PSM 17/19.
+                for sock in (itr, ctrl):
+                    try:
+                        sock.close()
+                    except OSError:
+                        pass
                 # Attempt to reconnect to the Switch
                 itr, ctrl = self.save_connection(e)
 
@@ -253,7 +266,7 @@ class ControllerServer():
                         # Switch responds to packets slower during pairing
                         # Pairing cycle responds optimally on a 15Hz loop
                         if not received_first_message:
-                            time.sleep(1)
+                            time.sleep(0.05)
                         else:
                             time.sleep(1/15)
 
@@ -300,41 +313,37 @@ class ControllerServer():
 
         self.state["state"] = "connected"
 
-        self.switch_address = itr.getsockname()[0]
+        # Store the Switch's address (the remote peer), not our own adapter,
+        # so a later reconnect() targets the Switch instead of looping back.
+        self.switch_address = itr.getpeername()[0]
 
         return itr, ctrl
 
     def connection_reset_watchdog(self):
 
-        connected_devices = []
-        connected_devices_count = {}
         while self._crw_running:
             paths = self.bt.find_connected_devices(alias_filter="Nintendo Switch")
-            # Keep track of Switches that connect
             if len(paths) > 0:
-                connected_devices = list(set(connected_devices + paths))
-            
-            # Increment a counter if a Switch connected and disconnected
-            disconnected = list(set(connected_devices) - set(paths))
+                self._watchdog_connected_devices = list(
+                    set(self._watchdog_connected_devices + paths))
+
+            disconnected = list(
+                set(self._watchdog_connected_devices) - set(paths))
             if len(disconnected) > 0:
                 for path in disconnected:
-                    if path not in connected_devices_count.keys():
-                        connected_devices_count[path] = 1
-                    else:
-                        connected_devices_count[path] += 1
-                connected_devices = list(set(connected_devices) - set(disconnected))
-            
-            # Delete Switches that connect/disconnect twice.
-            # This behaviour is characteristic of connection issues and is corrected
-            # by removing the Switch's connection to the system.
-            if len(connected_devices_count.keys()) > 0:
-                for key in connected_devices_count.keys():
-                    if connected_devices_count[key] >= 2:
-                        self.logger.debug(
-                            "A Nintendo Switch disconnected. Resetting Connection...")
-                        self.logger.debug(f"Removing {str(key)}")
-                        self.bt.remove_device(key)
-                        connected_devices_count[key] = 0
+                    self._watchdog_connected_devices_count[path] = (
+                        self._watchdog_connected_devices_count.get(path, 0) + 1
+                    )
+                self._watchdog_connected_devices = list(
+                    set(self._watchdog_connected_devices) - set(disconnected))
+
+            for key, count in list(self._watchdog_connected_devices_count.items()):
+                if count >= 2:
+                    self.logger.debug(
+                        "A Nintendo Switch disconnected. Resetting Connection...")
+                    self.logger.debug(f"Removing {str(key)}")
+                    self.bt.remove_device(key)
+                    self._watchdog_connected_devices_count[key] = 0
 
             time.sleep(0.1)
 
@@ -348,6 +357,7 @@ class ControllerServer():
         # succeeds. This prevents situations where the Switch will
         # disconnect during a connection.
         while True:
+            s_ctrl = s_itr = None
             try:
                 self.state["state"] = "connecting"
 
@@ -360,6 +370,9 @@ class ControllerServer():
                     family=socket.AF_BLUETOOTH,
                     type=socket.SOCK_SEQPACKET,
                     proto=socket.BTPROTO_L2CAP)
+
+                s_ctrl.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s_itr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
                 # Setting up HID interrupt/control sockets
                 try:
@@ -381,13 +394,11 @@ class ControllerServer():
                 self.bt.set_class("0x02508")
 
                 self._crw_running = True
-                crw = Thread(target = self.connection_reset_watchdog)
+                crw = Thread(target = self.connection_reset_watchdog, daemon=True)
                 crw.start()
 
                 itr, itr_address = s_itr.accept()
                 ctrl, ctrl_address = s_ctrl.accept()
-
-                self._crw_running = False
 
                 # Send an empty input report to the Switch to prompt a reply
                 self.protocol.process_commands(None)
@@ -432,14 +443,16 @@ class ControllerServer():
 
                     # Switch responds to packets slower during pairing
                     # Pairing cycle responds optimally on a 15Hz loop
-                    if not received_first_message:
-                        time.sleep(1)
-                    else:
-                        time.sleep(1/15)
+                    time.sleep(1/15)
                 
                 break
             except OSError as e:
                 self.logger.debug(e)
+                for sock in (s_ctrl, s_itr):
+                    try:
+                        sock.close()
+                    except Exception:
+                        pass
 
         self.input.exited_grip_order_menu = False
 
@@ -483,6 +496,8 @@ class ControllerServer():
                     test_itr.close()
                     test_ctrl.close()
                     pass
+                else:
+                    break
         elif type(reconnect_address) == str:
             test_itr, test_ctrl = recreate_sockets()
 
@@ -504,12 +519,10 @@ class ControllerServer():
         msg = self.protocol.get_report()
         itr.sendall(msg)
 
-        # Setting interrupt connection as non-blocking
-        # In this case, non-blocking means it throws a "BlockingIOError"
-        # for sending and receiving, instead of blocking
-        fcntl.fcntl(itr, fcntl.F_SETFL, os.O_NONBLOCK)
-
         return itr, ctrl
 
     def _on_exit(self):
+        self._crw_running = False
+        self._watchdog_connected_devices = []
+        self._watchdog_connected_devices_count = {}
         self.bt.reset_adapter()

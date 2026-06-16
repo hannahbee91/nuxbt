@@ -345,10 +345,13 @@ def _run_command(command):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
 
-    cmd_err = result.stderr.decode("utf-8").replace("\n", "")
-    if cmd_err != "":
-        raise Exception(cmd_err)
-    
+    # Judge success by the exit code, not by whether anything was written to
+    # stderr. Tools like hcitool/hciconfig emit warnings to stderr even on
+    # success, which would otherwise be misread as a failure.
+    if result.returncode != 0:
+        cmd_err = result.stderr.decode("utf-8").replace("\n", "").strip()
+        raise Exception(cmd_err or f"Command failed: {' '.join(command)}")
+
     return result
 
 
@@ -585,9 +588,11 @@ class BlueZ():
         dev_id = int(self.device_id.replace("hci", ""))
         
         sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_RAW, socket.BTPROTO_HCI)
-        sock.bind((dev_id,))
-        sock.send(pkt)
-        sock.close()
+        try:
+            sock.bind((dev_id,))
+            sock.send(pkt)
+        finally:
+            sock.close()
 
     def set_class(self, device_class):
         self.logger.info(f"Setting adapter class to {device_class}")
@@ -1070,8 +1075,10 @@ class BlueZ():
                 "Alias").upper()
 
             if device_conn_status:
-                if alias_filter and device_alias == alias_filter.upper():
-                    conn_devices.append(path)
+                if alias_filter:
+                    # Only track devices matching the requested alias
+                    if device_alias == alias_filter.upper():
+                        conn_devices.append(path)
                 else:
                     conn_devices.append(path)
 

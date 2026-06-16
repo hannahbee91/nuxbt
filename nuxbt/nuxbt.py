@@ -661,6 +661,7 @@ class Nuxbt():
             # This needs to be done to prevent race conditions
             # on Bluetooth resources.
             if type(controller_index) == int:
+                start = time.time()
                 while True:
                     if controller_index in self.manager_state.keys():
                         state = self.manager_state[controller_index]
@@ -669,6 +670,9 @@ class Nuxbt():
                                 state["state"] == "crashed"):
                             break
 
+                    if time.time() - start > 60:
+                        raise TimeoutError(
+                            "Timed out waiting for controller to initialize")
                     time.sleep(1/30)
         finally:
             self._controller_lock.release()
@@ -716,11 +720,15 @@ class Nuxbt():
         :type controller_index: int
         """
 
+        start = time.time()
         while not self.state[controller_index]["state"] == "connected":
             if self.state[controller_index]["state"] == "crashed":
                 raise OSError("The watched controller has crashe with error",
                               self.state[controller_index]["errors"])
-            pass
+            if time.time() - start > 120:
+                raise TimeoutError(
+                    "Timed out waiting for controller to connect")
+            time.sleep(1/30)
 
     def get_available_adapters(self):
         """Gets the DBus paths of all available Bluetooth
