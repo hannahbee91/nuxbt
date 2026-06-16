@@ -1,5 +1,5 @@
 from time import perf_counter
-from json import dumps
+from json import dumps, loads
 
 
 DIRECT_INPUT_IDLE_PACKET = {
@@ -96,7 +96,14 @@ class InputParser():
         # The start time for the current macro commands
         self.macro_timer_start = 0
 
-        self.controller_input = None
+        # The latest direct-input packet. Held (not consumed) so the mainloop
+        # can re-apply it on every send: the protocol report is ephemeral
+        # (get_report() clears it and process_commands() rebuilds a neutral
+        # baseline each cycle), so a held button/stick must be re-parsed every
+        # loop or the resends between input events would carry a neutral report
+        # and the input would stutter. Starts idle so active/idle checks are
+        # correct before the first event arrives.
+        self.controller_input = loads(dumps(DIRECT_INPUT_IDLE_PACKET))
 
         # Whether or not input has been entered
         # that would close the "Change Grip/Order" menu
@@ -181,10 +188,12 @@ class InputParser():
 
     def set_protocol_input(self, state=None):
 
-        # Act on direct input if we're not getting idle packets
+        # Act on direct input if we're not getting idle packets. Re-applied
+        # every cycle (not consumed): the protocol report is rebuilt fresh each
+        # loop, so a held input must be re-parsed each time or resends between
+        # input events would send a neutral report and the input would stutter.
         if dumps(self.controller_input) != dumps(DIRECT_INPUT_IDLE_PACKET):
             self.parse_controller_input(self.controller_input)
-            self.controller_input = None
 
         elif (self.macro_buffer or self.current_macro or
               self.current_macro_commands):
