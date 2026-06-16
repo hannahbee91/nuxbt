@@ -7,12 +7,13 @@ import select
 import logging
 import traceback
 import atexit
+from json import dumps
 from threading import Thread
 
 from .controller import Controller, ControllerTypes
 from ..bluez import BlueZ, find_devices_by_alias
 from .protocol import ControllerProtocol
-from .input import InputParser
+from .input import InputParser, DIRECT_INPUT_IDLE_PACKET
 from .utils import format_msg_controller, format_msg_switch
 
 
@@ -125,6 +126,48 @@ class ControllerServer():
     # doesn't drop the controller (replaces the old tick >= 132 counter).
     KEEPALIVE_INTERVAL = 1.0
 
+    def _sync_controller_input(self):
+        """Drain the per-controller task queue and fall back to shared state.
+
+        The hot loop is event-driven for low latency, but the upstream path
+        (WebRTC -> host coalescer -> unix socket) can drop a release event.
+        If we think we are still holding an input but shared state has moved
+        on, re-sync from shared state so we do not stay stuck on a held
+        button/stick indefinitely.
+        """
+
+        if self.task_queue is None:
+            return
+
+        # Drain the task queue every loop. This is cheap when empty and
+        # avoids missed wakeups from the Queue's internal buffer being out
+        # of sync with the pipe that select() watches.
+        try:
+            while True:
+                msg = self.task_queue.get_nowait()
+                if msg and msg["type"] == "macro":
+                    self.input.buffer_macro(msg["macro"], msg["macro_id"])
+                elif msg and msg["type"] == "stop":
+                    self.input.stop_macro(msg["macro_id"], state=self.state)
+                elif msg and msg["type"] == "clear":
+                    self.input.clear_macros()
+                elif msg and msg["type"] == "direct":
+                    self.input.set_controller_input(msg["input"])
+        except queue.Empty:
+            pass
+
+        # Fallback: if direct input is still being held, re-sync from the
+        # shared Manager dict. The main process writes every input packet
+        # there for observers (e.g. the web UI), so it is a reliable
+        # level-triggered view of the latest input even if the edge event
+        # on the queue was lost upstream. We only do this while the local
+        # controller_input believes it is active, so idle cycles pay no
+        # Manager dict IPC cost and macros are not interfered with.
+        if dumps(self.input.controller_input) != dumps(DIRECT_INPUT_IDLE_PACKET):
+            latest = self.state.get("direct_input")
+            if latest is not None:
+                self.input.set_controller_input(latest)
+
     def mainloop(self, itr, ctrl):
 
         # The interrupt socket plus the task queue's read end form the set of
@@ -155,25 +198,7 @@ class ControllerServer():
             except BlockingIOError:
                 reply = None
 
-            # Drain the task queue every loop. This is cheap when empty and
-            # avoids missed wakeups from the Queue's internal buffer being out
-            # of sync with the pipe that select() watches.
-            if self.task_queue is not None:
-                try:
-                    while True:
-                        msg = self.task_queue.get_nowait()
-                        if msg and msg["type"] == "macro":
-                            self.input.buffer_macro(
-                                msg["macro"], msg["macro_id"])
-                        elif msg and msg["type"] == "stop":
-                            self.input.stop_macro(
-                                msg["macro_id"], state=self.state)
-                        elif msg and msg["type"] == "clear":
-                            self.input.clear_macros()
-                        elif msg and msg["type"] == "direct":
-                            self.input.set_controller_input(msg["input"])
-                except queue.Empty:
-                    pass
+            self._sync_controller_input()
 
             self.protocol.process_commands(reply)
             self.input.set_protocol_input(state=self.state)
