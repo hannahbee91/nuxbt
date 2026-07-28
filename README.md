@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nuxbt">NUXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
+<h4 align="center">Fork and update of the original <a href="https://github.com/Brikwerk/nxbt">NXBT</a> - maintaining this fork as the original author has not been active for over 2 years.</h4>
 
 <h4 align="center">Control your Nintendo Switch through a website, terminal, or macro.</h4>
 
