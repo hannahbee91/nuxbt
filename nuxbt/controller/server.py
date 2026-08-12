@@ -16,6 +16,61 @@ from .input import InputParser
 from .utils import format_msg_controller, format_msg_switch
 
 
+CONTROLLER_LOOP_HZ = 132
+NANOSECONDS_PER_SECOND = 1_000_000_000
+
+
+class _ControllerLoopClock:
+    """Pace controller iterations on drift-free monotonic deadlines.
+
+    Integer rational deadlines make exactly ``hz`` intervals span one second
+    without accumulating the rounding error of repeated relative sleeps.
+    """
+
+    def __init__(self, hz=CONTROLLER_LOOP_HZ, *, monotonic_ns=None,
+                 sleeper=None):
+        if hz <= 0:
+            raise ValueError("controller loop frequency must be positive")
+
+        self.hz = hz
+        self._monotonic_ns = (
+            time.monotonic_ns if monotonic_ns is None else monotonic_ns
+        )
+        self._sleeper = time.sleep if sleeper is None else sleeper
+        self._epoch_ns = None
+        self._tick_index = 0
+
+    @property
+    def period_ceiling_ns(self):
+        return (NANOSECONDS_PER_SECOND + self.hz - 1) // self.hz
+
+    def wait_next_cycle(self):
+        """Wait for the next absolute deadline and return its actual start."""
+        now = self._monotonic_ns()
+        if self._epoch_ns is None:
+            self._epoch_ns = now
+            return now
+
+        self._tick_index += 1
+        deadline = (
+            self._epoch_ns
+            + self._tick_index * NANOSECONDS_PER_SECOND // self.hz
+        )
+
+        # Avoid bursts of catch-up reports after a suspend or long overrun.
+        # Ordinary sub-period jitter stays locked to the original phase.
+        if now - deadline >= self.period_ceiling_ns:
+            self._epoch_ns = now
+            self._tick_index = 0
+            return now
+
+        while now < deadline:
+            self._sleeper((deadline - now) / NANOSECONDS_PER_SECOND)
+            now = self._monotonic_ns()
+
+        return now
+
+
 class ControllerServer():
 
     def __init__(self, controller_type, adapter_path="/org/bluez/hci0",
@@ -116,12 +171,23 @@ class ControllerServer():
                 self.logger.debug("Error during graceful shutdown:")
                 self.logger.debug(traceback.format_exc())
 
-    def mainloop(self, itr, ctrl):
+    def mainloop(self, itr, ctrl, *, clock=None):
 
-        duration_start = time.perf_counter()
+        if clock is None:
+            clock = _ControllerLoopClock()
+        previous_cycle_start = None
+
         while True:
-            # Start timing command processing
-            timer_start = time.perf_counter()
+            # Pace the loop boundary itself. This also throttles retries after
+            # a non-blocking send, because the next iteration waits here.
+            cycle_start = clock.wait_next_cycle()
+            if previous_cycle_start is None:
+                duration_elapsed = None
+            else:
+                duration_elapsed = (
+                    cycle_start - previous_cycle_start
+                ) / NANOSECONDS_PER_SECOND
+            previous_cycle_start = cycle_start
 
             # Attempt to get output from Switch
             try:
@@ -175,7 +241,7 @@ class ControllerServer():
                     self.tick = 0
                 # Send a blank packet every so often to keep the Switch
                 # from disconnecting from the controller.
-                elif self.tick >= 132:
+                elif self.tick >= CONTROLLER_LOOP_HZ:
                     itr.sendall(msg)
                     self.tick = 0
             except BlockingIOError:
@@ -184,17 +250,10 @@ class ControllerServer():
                 # Attempt to reconnect to the Switch
                 itr, ctrl = self.save_connection(e)
 
-            # Figure out how long it took to process commands
-            duration_end = time.perf_counter()
-            duration_elapsed = duration_end - duration_start
-            duration_start = duration_end
-            
-            sleep_time = 1/132 - duration_elapsed
-            if sleep_time >= 0:
-                time.sleep(sleep_time)
             self.tick += 1
 
-            if self.logger_level <= logging.DEBUG:
+            if (self.logger_level <= logging.DEBUG and
+                    duration_elapsed is not None):
                 self.times.append(duration_elapsed)
                 if len(self.times) > 100:
                     self.times.pop()
