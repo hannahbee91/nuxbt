@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v3.3.7 (2026-08-12)
+
+### Bug Fixes
+
+- Pace controller loop on absolute deadlines ([#74](https://github.com/hannahbee91/nuxbt/pull/74),
+  [`117ea39`](https://github.com/hannahbee91/nuxbt/commit/117ea39718260eef434795749944f6a49362fe70))
+
+- **docs**: Fix link reference in README for NXBT
+  ([#69](https://github.com/hannahbee91/nuxbt/pull/69),
+  [`76443a9`](https://github.com/hannahbee91/nuxbt/commit/76443a9653aab815233abcfdf99848aecd874b24))
+
+
 ## v3.3.6 (2026-05-31)
 
 ### Bug Fixes
