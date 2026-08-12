@@ -1,3 +1,20 @@
+nuxbt (3.3.7-1~resolute1) resolute; urgency=medium
+
+  * New release 3.3.7
+  * ### Bug Fixes
+  * Pace controller loop on absolute deadlines
+    ([#74](https://github.com/hannahbee91/nuxbt/pull/74),
+  *
+    [`117ea39`](https://github.com/hannahbee91/nuxbt/commit/117ea3971826
+    0eef434795749944f6a49362fe70))
+  * **docs**: Fix link reference in README for NXBT
+  *   ([#69](https://github.com/hannahbee91/nuxbt/pull/69),
+  *
+    [`76443a9`](https://github.com/hannahbee91/nuxbt/commit/76443a9653aa
+    b815233abcfdf99848aecd874b24))
+
+ -- NUXBT Releases <nuxbt@hannahis.gay>  Wed, 12 Aug 2026 16:38:52 +0000
+
 nuxbt (3.3.7-1~noble1) noble; urgency=medium
 
   * New release 3.3.7
