@@ -726,7 +726,9 @@ class Nuxbt():
         :rtype: list
         """
 
-        return (find_devices_by_alias("Nintendo Switch"))
+        # Only bonded devices have a usable link key. The Switch 2 reports
+        # Bonded: no, so it should always be paired from scratch.
+        return find_devices_by_alias("Nintendo Switch", bonded_only=True)
 
     @property
     def state(self):

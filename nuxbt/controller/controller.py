@@ -43,7 +43,9 @@ class Controller():
         self.bt.set_powered(True)
         self.bt.set_pairable(True)
         self.bt.set_pairable_timeout(0)
-        self.bt.set_discoverable_timeout(180)
+        # Keep advertising until a Switch connects. The Switch 2 pairing
+        # screen can take longer than the previous 180 second timeout.
+        self.bt.set_discoverable_timeout(0)
 
         self.bt.set_alias(self.alias)
 
