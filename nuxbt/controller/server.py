@@ -370,7 +370,9 @@ class ControllerServer():
 
         self.state["state"] = "connected"
 
-        self.switch_address = itr.getsockname()[0]
+        # After falling back to connect(), remember the console's address,
+        # not the adapter's local address.
+        self.switch_address = itr.getpeername()[0]
 
         return itr, ctrl
 
