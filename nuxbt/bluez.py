@@ -399,14 +399,21 @@ def replace_mac_addresses(adapter_paths, addresses):
         _run_command(['hciconfig', adapter_id, 'reset'])
 
 
-def find_devices_by_alias(alias, return_path=False, created_bus=None):
+def find_devices_by_alias(alias, return_path=False, created_bus=None,
+                          bonded_only=False):
     """Finds the Bluetooth addresses of devices
     that have a specified Bluetooth alias. Aliases
     are converted to uppercase before comparison
     as BlueZ usually converts aliases to uppercase.
 
-    :param address: The Bluetooth MAC address
-    :type address: string
+    :param alias: The device's alias
+    :type alias: string
+    :param return_path: Also return the D-Bus object paths
+    :type return_path: bool
+    :param created_bus: An existing D-Bus connection to reuse
+    :type created_bus: dbus.SystemBus or None
+    :param bonded_only: Only return devices with a stored link key
+    :type bonded_only: bool
     :return: The path to the D-Bus object or None
     :rtype: string or None
     """
@@ -434,9 +441,14 @@ def find_devices_by_alias(alias, return_path=False, created_bus=None):
         device_addr = device_props.Get(
             DEVICE_INTERFACE,
             "Address").upper()
+        device_bonded = device_props.Get(
+            DEVICE_INTERFACE,
+            "Bonded")
 
         # Check for an address match
         if device_alias.upper() == alias.upper():
+            if bonded_only and not device_bonded:
+                continue
             addresses.append(device_addr)
             matching_paths.append(path)
 
