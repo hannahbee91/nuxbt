@@ -1,6 +1,37 @@
 # CHANGELOG
 
 
+## v3.3.8 (2026-10-26)
+
+### Bug Fixes
+
+- **controller**: Fix Switch 2 pairing and webapp reconnect issues
+  ([#78](https://github.com/hannahbee91/nuxbt/pull/78),
+  [`44a6ebc`](https://github.com/hannahbee91/nuxbt/commit/44a6ebc6ad5b233e60be7eeb959145cc91aae173))
+
+* fix(controller): Fix Switch 2 pairing and webapp reconnect issues
+
+- only attempt link-key reconnects for devices BlueZ reports as bonded (the Switch 2 reports Bonded:
+  no and would otherwise hang) - keep the adapter discoverable until a console connects - use
+  Socket.IO polling for the webapp (uvicorn + a2wsgi has no WebSocket) - parse -a/--address as text
+  instead of a boolean flag - document Switch 2 link-key behaviour and the MAC rotation workaround
+
+* fix(controller): recover from connection reset during recv
+
+When the Switch sleeps it tears down the HID interrupt socket. recv() then raises
+  ConnectionResetError, which escaped mainloop and marked the controller as crashed. Catch OSError
+  here and reuse save_connection() so the controller either reconnects or waits for a new pairing.
+
+* fix(controller): use peer address after fallback connect
+
+save_connection() used getsockname(), which returns the local adapter address, so a later reconnect
+  would target the Pi itself. Use getpeername() to keep the console's address.
+
+---------
+
+Co-authored-by: lilonglong <lilonglong@localhost>
+
+
 ## v3.3.7 (2026-08-12)
 
 ### Bug Fixes
